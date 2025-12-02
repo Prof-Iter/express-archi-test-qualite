@@ -15,10 +15,21 @@ class CreateOrderDummyOrderRepository implements CreateOrderOrderRepository {
 }
 
 class CreateOrderProductDummyRepository implements  CreateOrderProductRepository {
+
+    products: Product[] = [];
+
+    constructor() {
+        const product1 = new Product({title: "test", description: "test", price: 75});
+        product1.id = 1;
+        this.products.push(product1);
+
+        const product2 = new Product({title: "test2", description: "test2", price: 100});
+        product2.id = 2;
+        this.products.push(product2);
+    }
+
     async getById(id: number): Promise<Product> {
-        const product = new Product({title: "test", description: "test", price: 75});
-        product.id = 1;
-        return product;
+        return this.products.find(p => p.id === id);
     }
 }
 
@@ -38,6 +49,23 @@ describe("US-3 : Créer une commande",  () => {
 
         // Alors la commande doit être créée avec un prix total de 150€ (calculé automatiquement : 75€ * 2)
         expect(createOrderOrderRepository.orders[0].totalPrice).toBe(150);
+    });
+
+    test("Scénario 2: échec, prix total supérieur ou égal à 200€", async () => {
+
+        // Étant donné qu'il n'y a pas de commande enregistrée
+        // et qu'un produit existe avec l'id 2 et un prix de 100€
+        const createOrderOrderRepository = new CreateOrderDummyOrderRepository();
+        const createOrderProductRepository = new CreateOrderProductDummyRepository();
+
+        // Quand je créé une commande avec une quantité de 2 (prix total calculé = 200€)
+
+        const createOrderUseCase = new CreateOrderUseCase(createOrderProductRepository, createOrderOrderRepository);
+
+        // Alors une erreur doit être envoyée "le prix par commande doit être inférieur à 200€"
+        await expect(createOrderUseCase.execute({id: 2, quantity: 2}))
+            .rejects
+            .toThrow("le prix par commande doit être inférieur à 200€");
     });
 
 });

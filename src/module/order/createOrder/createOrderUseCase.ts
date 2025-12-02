@@ -12,9 +12,7 @@ export default class CreateOrderUseCase {
     async execute({id, quantity}: {id: number; quantity: number}){
         const product = await this.createOrderProductRepository.getById(id);
 
-        const order = new Order();
-
-        order.totalPrice = product.price * quantity;
+        const order = new Order({product, quantity});
 
         await this.createOrderOrderRepository.save(order);
     }
