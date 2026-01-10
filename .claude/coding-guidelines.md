@@ -2,9 +2,41 @@
 
 This document outlines the architectural principles and testing strategies for this project.
 
+## Test first approach
+
+Always write tests first, then implement the code. Whenever it's unit test, acceptance test, or integration test
+
+## Clean code
+ - favor immutable classes (records) and variables
+ - favor Builder pattern for complex objects
+ - favor fluent interfaces
+ - interface segregation, wisely
+ - favor pure functions
+ - favor composability over inheritance
+ - follow the SOLID principles
+ - favor the use of design patterns
+ - follow the Unix Philosophy, applied to classes and functions (small, focused, single responsibility)
+ - favor the use of functional programming
+ - favor the use of reactive programming
+ - don't hesitate to suggest the use of existing libraries instead of reinventing the wheel 
+
+### the Repository pattern
+ - one interface per repository
+ - one repository per entity, including all CRUD functions
+ - one default implementation per repository, ORM based
+ - favor the use of dependency injection
+ - catch repository errors and return `Either` (Monad)
+
 ## Architecture Principles
 
 The project follows a **Vertical Slice Architecture** combined with **Domain-Driven Design (DDD)** and **Clean Architecture** principles.
+
+### Functional Programming & Monads
+The project uses `purify-ts` to handle side effects and errors in a type-safe manner.
+ - **Error Handling**: Use `Either` (Left/Right) instead of throwing exceptions in Use Cases and Repositories.
+ - **Optional Values**: Use `Maybe` (Just/Nothing) instead of `null` or `undefined`.
+ - **Repository Errors**: Catch infrastructure-level errors in repositories and wrap them in a `Left`.
+ - **Refer to the Guide**: See `docs/purify-ts-quicktour.md` for hands-on examples and patterns.
 
 ### 1. Vertical Slice Architecture
 Each feature (use case) is organized into its own self-contained directory. This minimizes coupling between different parts of the system and makes it easier to navigate the codebase.

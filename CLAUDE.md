@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## my human preferences
+
+- always propose a plan, and wait for my approval before starting to code
+- always use the coding guidelines
+- always use the git workflow
+- 
+
+
 ## Project Overview
 
 An Express.js e-commerce API built with TypeScript, TypeORM, and PostgreSQL. The project implements domain-driven design principles with a clean architecture approach.
