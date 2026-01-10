@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - always use the git workflow
 - always breakdown work to do into phases then into small tasks
 - do a commit after each new group of tests that validate a phase is passing
-
+- DO NOT add comments at each line, only comment at function level, only if the function is complex
 
 
 ## Project Overview

@@ -1,29 +1,50 @@
-import AppDataSource from "../../../config/db.config";
-import {Product} from "../Product";
+import { Either, Left } from 'purify-ts/Either';
+import { ProductRepository } from "../ProductRepository";
+import { Product } from "../Product";
 
-export default class UpdateProductUseCase {
+export class UpdateProductUseCase {
 
-    async execute({id, title, description, price}: {id: number, title: string, description: string, price: number}) {
+    constructor(private readonly productRepository: ProductRepository) {}
 
-        const typeOrmRepository = AppDataSource.getRepository<Product>(Product);
+    async execute({id, title, description, price}: {id: number, title: string, description: string, price: number}): Promise<Either<Error, Product>> {
 
-        const product = await typeOrmRepository.findOneBy({id});
+        // Find existing product
+        const findResult = await this.productRepository.findById(id);
 
-        if (!product) {
-            throw new Error("Product not found");
+        // Handle repository errors
+        if (findResult.isLeft()) {
+            return Left(new Error("erreur lors de la recherche du produit"));
         }
 
-        if (product.price < 0) {
-            throw new Error("Price cannot be negative");
-        }
+        // Get Maybe<Product> from Right side
+        return findResult.caseOf({
+            Left: (error) => Left(error),
+            Right: (maybeProduct) => {
+                // Check if product exists
+                if (maybeProduct.isNothing()) {
+                    return Left(new Error("produit non trouvé"));
+                }
 
-        product.title = title;
-        product.description = description;
-        product.price = price;
+                // Validate and update product (domain validation happens in Product entity)
+                try {
+                    const product = maybeProduct.extract();
 
-        await typeOrmRepository.save(product);
+                    // Trigger domain validation by creating a new instance
+                    const validatedProduct = new Product({ title, description, price });
+                    validatedProduct.id = product.id;
 
-
+                    // Save updated product - this returns a Promise, so we need to handle it differently
+                    return this.productRepository.save(validatedProduct)
+                        .then(saveResult => saveResult.mapLeft(() => new Error("erreur lors de la mise à jour du produit")));
+                } catch (error) {
+                    // Domain validation errors from Product constructor
+                    if (error instanceof Error) {
+                        return Promise.resolve(Left(error));
+                    }
+                    return Promise.resolve(Left(new Error("erreur lors de la mise à jour du produit")));
+                }
+            }
+        });
     }
 
 }

@@ -19,7 +19,7 @@ router.post('/product', async (request: Request, response: Response) => {
             // Return 400 for all errors (domain validation or repository errors)
             return response.status(400).json({message: error.message});
         },
-        Right: (product) => {
+        Right: (_product) => {
             return response.status(201).json();
         }
     });
