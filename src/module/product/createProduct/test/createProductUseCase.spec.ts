@@ -1,65 +1,13 @@
 import {describe, expect, test} from "@jest/globals";
-import { Either, Left, Right } from 'purify-ts/Either';
-import { Maybe } from 'purify-ts/Maybe';
 import {CreateProductUseCase} from "../createProductUseCase";
-import { ProductRepository } from "../../ProductRepository";
-import {Product} from "../../Product";
-
-
-class CreateProductDummyRepository implements ProductRepository {
-
-    async save(product: Product): Promise<Either<Error, Product>> {
-        // Simule une sauvegarde réussie
-        return Right(product);
-    }
-
-    async findById(id: number): Promise<Either<Error, Maybe<Product>>> {
-        return Right(Maybe.empty());
-    }
-
-    async findAll(): Promise<Either<Error, Product[]>> {
-        return Right([]);
-    }
-
-    async update(id: number, data: Partial<Omit<Product, 'id'>>): Promise<Either<Error, Maybe<Product>>> {
-        return Right(Maybe.empty());
-    }
-
-    async delete(id: number): Promise<Either<Error, boolean>> {
-        return Right(false);
-    }
-}
-
-class CreateProductMockFailRepository implements ProductRepository {
-
-    async save(product: Product): Promise<Either<Error, Product>> {
-        // Simule une erreur de sauvegarde
-        return Left(new Error("fail gtredeapkdzepnip"));
-    }
-
-    async findById(id: number): Promise<Either<Error, Maybe<Product>>> {
-        return Right(Maybe.empty());
-    }
-
-    async findAll(): Promise<Either<Error, Product[]>> {
-        return Right([]);
-    }
-
-    async update(id: number, data: Partial<Omit<Product, 'id'>>): Promise<Either<Error, Maybe<Product>>> {
-        return Right(Maybe.empty());
-    }
-
-    async delete(id: number): Promise<Either<Error, boolean>> {
-        return Right(false);
-    }
-}
+import { ProductRepositoryDummy, ProductRepositoryFail } from "../../test/fakes/ProductRepositoryFakes";
 
 describe("US-1 : Créer un produit",  () => {
 
     test("Scénario 1 : création réussie", async () => {
 
         // Étant donné qu'il n'y a pas de produit enregistré
-        const createProductRepository = new CreateProductDummyRepository();
+        const createProductRepository = new ProductRepositoryDummy();
         const createProductUseCase = new CreateProductUseCase(createProductRepository);
 
         // Quand je créé un produit avec en titre «switch 2», description «nouvelle console» et un prix à 500
@@ -77,7 +25,7 @@ describe("US-1 : Créer un produit",  () => {
     test('Scénario 2 : echec, titre trop court', async () => {
 
         //Étant donné qu'il n'y a pas de produit enregistré
-        const createProductRepository = new CreateProductDummyRepository();
+        const createProductRepository = new ProductRepositoryDummy();
         const createProductUseCase = new CreateProductUseCase(createProductRepository);
 
         // Quand je créé un produit avec en titre «sw»
@@ -94,7 +42,7 @@ describe("US-1 : Créer un produit",  () => {
     test('Scénario 3 : echec, prix négatif', async () => {
 
         //Étant donné qu'il n'y a pas de produit enregistré
-        const createProductRepository = new CreateProductDummyRepository();
+        const createProductRepository = new ProductRepositoryDummy();
         const createProductUseCase = new CreateProductUseCase(createProductRepository);
 
         // Quand je créé un produit avec en prix -10
@@ -109,7 +57,7 @@ describe("US-1 : Créer un produit",  () => {
 
     test('Scénario 4 : création échouée, prix supérieur à 10000', async () => {
         //Étant donné qu'il n'y a pas de produit enregistré
-        const createProductRepository = new CreateProductDummyRepository();
+        const createProductRepository = new ProductRepositoryDummy();
         const createProductUseCase = new CreateProductUseCase(createProductRepository);
 
         // Quand je créé un produit avec en prix 11000
@@ -122,14 +70,9 @@ describe("US-1 : Créer un produit",  () => {
         });
     });
 
-    //    - Exemple 5/ Scénario 5 : création échouée, échec de sauvegarde non prévue
-    //       - Étant donné qu'il n'y a pas de produit enregistré
-    //       - Quand je créé un produit, si la sauvegarde échoue
-    //       - Alors une erreur doit être envoyée «erreur lors de la création du produit»
-
     test('Scénario 5 : création échouée, échec de sauvegarde non prévue', async () => {
         //Étant donné qu'il n'y a pas de produit enregistré
-        const createProductRepository = new CreateProductMockFailRepository();
+        const createProductRepository = new ProductRepositoryFail();
         const createProductUseCase = new CreateProductUseCase(createProductRepository);
 
         // Quand je créé un produit
