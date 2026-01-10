@@ -1,4 +1,3 @@
-import {jest} from "@jest/globals";
 import {PostgreSqlContainer} from "@testcontainers/postgresql";
 import AppDataSource from "../src/config/db.config";
 

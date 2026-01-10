@@ -20,7 +20,7 @@ export class CreateProductUseCase {
             const saveResult = await this.productRepository.save(product);
 
             // Return the result (Either<Error, Product>)
-            return saveResult.mapLeft(_error =>
+            return saveResult.mapLeft(_ =>
                 new Error("erreur lors de la création du produit")
             );
         } catch (error) {

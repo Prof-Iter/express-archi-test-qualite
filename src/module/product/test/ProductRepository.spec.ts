@@ -61,9 +61,8 @@ describe('ProductRepository - Tests unitaires avec base de données en mémoire'
 
         test('doit retourner Left en cas d\'erreur de validation du domaine', async () => {
             // Étant donné un produit invalide (prix négatif)
-            let product: Product;
             try {
-                product = new Product({
+                new Product({
                     title: 'Produit invalide',
                     description: 'Prix négatif',
                     price: -10

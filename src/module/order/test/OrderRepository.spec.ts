@@ -67,7 +67,7 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
             await dataSource.getRepository(Product).save(expensiveProduct);
 
             try {
-                const order = new Order({ product: expensiveProduct, quantity: 2 });
+                new Order({ product: expensiveProduct, quantity: 2 });
             } catch (error) {
                 // Le constructeur lève une erreur pour les validations de domaine
                 expect(error).toBeInstanceOf(Error);
