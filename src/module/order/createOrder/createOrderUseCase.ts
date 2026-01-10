@@ -1,20 +1,38 @@
-import { CreateOrderProductRepository } from './createOrder.productRepository';
+import { Either, Left, Right } from 'purify-ts/Either';
 import { Order } from '../Order';
-import CreateOrderOrderRepository from './createOrderOrderRepository';
+import { OrderRepository } from '../OrderRepository';
+import { ProductRepository } from '../../product/ProductRepository';
 
 export default class CreateOrderUseCase {
 
     constructor(
-        private readonly createOrderProductRepository: CreateOrderProductRepository,
-        private readonly createOrderOrderRepository: CreateOrderOrderRepository
+        private readonly productRepository: ProductRepository,
+        private readonly orderRepository: OrderRepository
     ) {}
 
-    async execute({id, quantity}: {id: number; quantity: number}){
-        const product = await this.createOrderProductRepository.getById(id);
+    async execute({id, quantity}: {id: number; quantity: number}): Promise<Either<Error, Order>> {
+        const productResult = await this.productRepository.findById(id);
 
-        const order = new Order({product, quantity});
-
-        await this.createOrderOrderRepository.save(order);
+        return productResult.caseOf({
+            Left: (error) => Left(error),
+            Right: (maybeProduct) => {
+                return maybeProduct.caseOf({
+                    Nothing: () => Left(new Error("produit non trouvé")),
+                    Just: async (product) => {
+                        try {
+                            const order = new Order({product, quantity});
+                            const saveResult = await this.orderRepository.save(order);
+                            return saveResult;
+                        } catch (error) {
+                            if (error instanceof Error) {
+                                return Left(error);
+                            }
+                            return Left(new Error("erreur lors de la création de la commande"));
+                        }
+                    }
+                });
+            }
+        });
     }
 
 }
