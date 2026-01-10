@@ -34,3 +34,46 @@ export class Order {
         return Right(new Order({ product, quantity, totalPrice: total }));
     }
 }
+
+export class OrderBuilder {
+    private props: { product: Product, quantity: number, totalPrice: number } = {
+        product: null as any,
+        quantity: 1,
+        totalPrice: 0
+    };
+    private id?: number;
+
+    withProduct(product: Product): OrderBuilder {
+        this.props.product = product;
+        if (product) {
+            this.props.totalPrice = product.price * this.props.quantity;
+        }
+        return this;
+    }
+
+    withQuantity(quantity: number): OrderBuilder {
+        this.props.quantity = quantity;
+        if (this.props.product) {
+            this.props.totalPrice = this.props.product.price * quantity;
+        }
+        return this;
+    }
+
+    withTotalPrice(totalPrice: number): OrderBuilder {
+        this.props.totalPrice = totalPrice;
+        return this;
+    }
+
+    withId(id: number): OrderBuilder {
+        this.id = id;
+        return this;
+    }
+
+    build(): Order {
+        const order = new Order(this.props);
+        if (this.id !== undefined) {
+            order.id = this.id;
+        }
+        return order;
+    }
+}

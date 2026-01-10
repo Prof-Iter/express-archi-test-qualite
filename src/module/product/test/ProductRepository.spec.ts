@@ -61,6 +61,7 @@ describe('ProductRepository - Tests unitaires avec base de données en mémoire'
 
         test('doit retourner Left en cas d\'erreur de validation du domaine', async () => {
             // Étant donné un produit invalide (prix négatif)
+            // On utilise quand même create ici car on veut tester la validation du domaine déclenchée par create
             const result = Product.create({
                 title: 'Produit invalide',
                 description: 'Prix négatif',
@@ -203,11 +204,11 @@ describe('ProductRepository - Tests unitaires avec base de données en mémoire'
     describe('delete()', () => {
         test('doit supprimer un produit existant et retourner Right(true)', async () => {
             // Étant donné un produit sauvegardé
-            const product = new Product({
-                title: 'Game Boy',
-                description: 'Console rétro',
-                price: 89
-            });
+            const product = new ProductBuilder()
+                .withTitle('Game Boy')
+                .withDescription('Console rétro')
+                .withPrice(89)
+                .build();
             const saveResult = await repository.save(product);
             let savedId: number = 0;
             saveResult.ifRight(p => { savedId = p.id; });

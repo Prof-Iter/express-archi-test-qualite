@@ -1,6 +1,6 @@
 import { describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import { DataSource } from 'typeorm';
-import { Order } from '../Order';
+import { Order, OrderBuilder } from '../Order';
 import { Product, ProductBuilder } from '../../product/Product';
 import { OrderTypeOrmRepository } from '../OrderTypeOrmRepository';
 
@@ -50,9 +50,10 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('save()', () => {
         test('doit sauvegarder une nouvelle commande et retourner Right avec la commande sauvegardée', async () => {
             // Étant donné une nouvelle commande valide
-            const orderResult = Order.create({ product: testProduct, quantity: 2 });
-            expect(orderResult.isRight()).toBe(true);
-            const order = orderResult.extract() as Order;
+            const order = new OrderBuilder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .build();
 
             // Quand on la sauvegarde
             const result = await repository.save(order);
@@ -76,6 +77,7 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
                 .build();
             await dataSource.getRepository(Product).save(expensiveProduct);
 
+            // On utilise create ici pour tester la validation du domaine déclenchée par create
             const result = Order.create({ product: expensiveProduct, quantity: 2 });
             
             // Alors le résultat doit être Left
@@ -89,8 +91,11 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('findById()', () => {
         test('doit retourner Right avec Maybe.of(order) quand la commande existe', async () => {
             // Étant donné une commande sauvegardée
-            const orderResult = Order.create({ product: testProduct, quantity: 2 });
-            const saveResult = await repository.save(orderResult.extract() as Order);
+            const order = new OrderBuilder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .build();
+            const saveResult = await repository.save(order);
             let savedId: number = 0;
             saveResult.ifRight(o => { savedId = o.id; });
 
@@ -127,8 +132,8 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('findAll()', () => {
         test('doit retourner Right avec toutes les commandes', async () => {
             // Étant donné plusieurs commandes sauvegardées
-            const order1 = Order.create({ product: testProduct, quantity: 1 }).extract() as Order;
-            const order2 = Order.create({ product: testProduct, quantity: 2 }).extract() as Order;
+            const order1 = new OrderBuilder().withProduct(testProduct).withQuantity(1).build();
+            const order2 = new OrderBuilder().withProduct(testProduct).withQuantity(2).build();
 
             await repository.save(order1);
             await repository.save(order2);
@@ -163,7 +168,7 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('update()', () => {
         test('doit mettre à jour une commande existante et retourner Right avec Maybe.of(order)', async () => {
             // Étant donné une commande sauvegardée
-            const order = Order.create({ product: testProduct, quantity: 1 }).extract() as Order;
+            const order = new OrderBuilder().withProduct(testProduct).withQuantity(1).build();
             const saveResult = await repository.save(order);
             let savedId: number = 0;
             saveResult.ifRight(o => { savedId = o.id; });
@@ -206,7 +211,7 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('delete()', () => {
         test('doit supprimer une commande existante et retourner Right(true)', async () => {
             // Étant donné une commande sauvegardée
-            const order = Order.create({ product: testProduct, quantity: 1 }).extract() as Order;
+            const order = new OrderBuilder().withProduct(testProduct).withQuantity(1).build();
             const saveResult = await repository.save(order);
             let savedId: number = 0;
             saveResult.ifRight(o => { savedId = o.id; });
