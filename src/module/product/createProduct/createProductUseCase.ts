@@ -1,26 +1,34 @@
-import {CreateProductRepository} from "./createProductRepository";
-import {Product} from "../Product";
+import { Either, Left } from 'purify-ts/Either';
+import { ProductRepository } from "../ProductRepository";
+import { Product } from "../Product";
 
 export class CreateProductUseCase {
 
-    private productRepository: CreateProductRepository;
+    private productRepository: ProductRepository;
 
-    constructor(productRepository: CreateProductRepository) {
+    constructor(productRepository: ProductRepository) {
         this.productRepository = productRepository;
     }
 
-    async execute({title, description, price}: {title: string, description: string, price: number}): Promise<void> {
+    async execute({title, description, price}: {title: string, description: string, price: number}): Promise<Either<Error, Product>> {
 
-
-        const product = new Product({title, description, price});
-
+        // Validate and create product (domain validation happens in constructor)
         try {
-            await this.productRepository.save(product);
+            const product = new Product({title, description, price});
+
+            // Save product using repository
+            const saveResult = await this.productRepository.save(product);
+
+            // Return the result (Either<Error, Product>)
+            return saveResult.mapLeft(error =>
+                new Error("erreur lors de la création du produit")
+            );
         } catch (error) {
-            throw new Error("erreur lors de la création du produit");
+            // Domain validation errors from Product constructor
+            if (error instanceof Error) {
+                return Left(error);
+            }
+            return Left(new Error("erreur lors de la création du produit"));
         }
-
     }
-
-
 }

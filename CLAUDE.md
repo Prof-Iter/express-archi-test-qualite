@@ -7,7 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - always propose a plan, and wait for my approval before starting to code
 - always use the coding guidelines
 - always use the git workflow
-- 
+- always breakdown work to do into phases then into small tasks
+- do a commit after each new group of tests that validate a phase is passing
+
 
 
 ## Project Overview

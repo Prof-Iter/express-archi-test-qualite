@@ -1,4 +1,4 @@
-import {CreateProductTypeOrmRepository} from "./createProductTypeOrmRepository";
+import { ProductTypeOrmRepository } from "../ProductTypeOrmRepository";
 
 const express = require("express");
 const router = express.Router();
@@ -9,21 +9,20 @@ router.post('/product', async (request: Request, response: Response) => {
 
     const {title, description, price} = request.body;
 
-    const createProductTypeOrmRepository = new CreateProductTypeOrmRepository();
-    const createProductUseCase = new CreateProductUseCase(createProductTypeOrmRepository);
+    const productRepository = new ProductTypeOrmRepository();
+    const createProductUseCase = new CreateProductUseCase(productRepository);
 
-    try {
-        await createProductUseCase.execute({title, description, price});
-    } catch (error) {
-        if (error instanceof Error) {
+    const result = await createProductUseCase.execute({title, description, price});
+
+    return result.caseOf({
+        Left: (error: Error) => {
+            // Return 400 for all errors (domain validation or repository errors)
             return response.status(400).json({message: error.message});
+        },
+        Right: (product) => {
+            return response.status(201).json();
         }
-
-        return response.status(500).json({message: "Internal server error"});
-
-    }
-
-    return response.status(201).json();
+    });
 });
 
 

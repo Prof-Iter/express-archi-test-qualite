@@ -27,6 +27,13 @@ Always write tests first, then implement the code. Whenever it's unit test, acce
  - favor the use of dependency injection
  - catch repository errors and return `Either` (Monad)
 
+## Modern TypeScript style
+- use imports instead of require
+- use async/await instead of promises
+- **Asynchronous Best Practices**: See `docs/async-await-best-practices.md` for a detailed guide on modern async/await patterns.
+
+
+
 ## Architecture Principles
 
 The project follows a **Vertical Slice Architecture** combined with **Domain-Driven Design (DDD)** and **Clean Architecture** principles.
