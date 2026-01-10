@@ -19,6 +19,10 @@ Always write tests first, then implement the code. Whenever it's unit test, acce
  - favor the use of functional programming
  - favor the use of reactive programming
  - don't hesitate to suggest the use of existing libraries instead of reinventing the wheel 
+ - Builder pattern for tests,  do not use directly constructors of entities in tests
+ - Constructors must not contain any logic, and never throw exceptions
+ - favor the use of dependency injection
+ - favor the use of the builder pattern
 
 ### the Repository pattern
  - one interface per repository

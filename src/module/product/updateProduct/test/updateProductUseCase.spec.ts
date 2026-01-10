@@ -1,15 +1,19 @@
 import {describe, expect, test} from "@jest/globals";
 import { UpdateProductUseCase } from "../updateProductUseCase";
 import { ProductRepositoryInMemory, ProductRepositoryFail } from "../../test/fakes/ProductRepositoryFakes";
-import {Product} from "../../Product";
+import {ProductBuilder} from "../../Product";
 
 describe("UpdateProductUseCase",  () => {
 
     test("Scénario 1 : mise à jour réussie", async () => {
 
         // Étant donné un produit existant avec id=1
-        const existingProduct = new Product({ title: "Test Product", description: "Test Description", price: 100 });
-        existingProduct.id = 1;
+        const existingProduct = new ProductBuilder()
+            .withTitle("Test Product")
+            .withDescription("Test Description")
+            .withPrice(100)
+            .withId(1)
+            .build();
 
         const repository = new ProductRepositoryInMemory([existingProduct]);
         const updateProductUseCase = new UpdateProductUseCase(repository);
@@ -46,8 +50,12 @@ describe("UpdateProductUseCase",  () => {
     test('Scénario 3 : échec, validation du prix (négatif)', async () => {
 
         // Étant donné un produit existant
-        const existingProduct = new Product({ title: "Test Product", description: "Test Description", price: 100 });
-        existingProduct.id = 1;
+        const existingProduct = new ProductBuilder()
+            .withTitle("Test Product")
+            .withDescription("Test Description")
+            .withPrice(100)
+            .withId(1)
+            .build();
 
         const repository = new ProductRepositoryInMemory([existingProduct]);
         const updateProductUseCase = new UpdateProductUseCase(repository);
@@ -65,8 +73,12 @@ describe("UpdateProductUseCase",  () => {
     test('Scénario 4 : échec, validation du titre (trop court)', async () => {
 
         // Étant donné un produit existant
-        const existingProduct = new Product({ title: "Test Product", description: "Test Description", price: 100 });
-        existingProduct.id = 1;
+        const existingProduct = new ProductBuilder()
+            .withTitle("Test Product")
+            .withDescription("Test Description")
+            .withPrice(100)
+            .withId(1)
+            .build();
 
         const repository = new ProductRepositoryInMemory([existingProduct]);
         const updateProductUseCase = new UpdateProductUseCase(repository);

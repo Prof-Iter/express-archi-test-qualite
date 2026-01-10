@@ -1,6 +1,6 @@
 import { describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import { DataSource } from 'typeorm';
-import { Product } from '../Product';
+import { Product, ProductBuilder } from '../Product';
 import { ProductTypeOrmRepository } from '../ProductTypeOrmRepository';
 
 describe('ProductRepository - Tests unitaires avec base de données en mémoire', () => {
@@ -40,11 +40,11 @@ describe('ProductRepository - Tests unitaires avec base de données en mémoire'
     describe('save()', () => {
         test('doit sauvegarder un nouveau produit et retourner Right avec le produit sauvegardé', async () => {
             // Étant donné un nouveau produit valide
-            const product = new Product({
-                title: 'Nintendo Switch',
-                description: 'Console de jeu portable',
-                price: 299.99
-            });
+            const product = new ProductBuilder()
+                .withTitle('Nintendo Switch')
+                .withDescription('Console de jeu portable')
+                .withPrice(299.99)
+                .build();
 
             // Quand on le sauvegarde
             const result = await repository.save(product);
@@ -61,28 +61,28 @@ describe('ProductRepository - Tests unitaires avec base de données en mémoire'
 
         test('doit retourner Left en cas d\'erreur de validation du domaine', async () => {
             // Étant donné un produit invalide (prix négatif)
-            try {
-                new Product({
-                    title: 'Produit invalide',
-                    description: 'Prix négatif',
-                    price: -10
-                });
-            } catch (error) {
-                // Le constructeur lève une erreur pour les validations de domaine
-                expect(error).toBeInstanceOf(Error);
-                expect((error as Error).message).toBe('le prix doit être supérieur à 0');
-            }
+            const result = Product.create({
+                title: 'Produit invalide',
+                description: 'Prix négatif',
+                price: -10
+            });
+
+            // Alors le résultat doit être Left
+            expect(result.isLeft()).toBe(true);
+            result.mapLeft(error => {
+                expect(error.message).toBe('le prix doit être supérieur à 0');
+            });
         });
     });
 
     describe('findById()', () => {
         test('doit retourner Right avec Maybe.of(product) quand le produit existe', async () => {
             // Étant donné un produit sauvegardé
-            const product = new Product({
-                title: 'PlayStation 5',
-                description: 'Console nouvelle génération',
-                price: 499.99
-            });
+            const product = new ProductBuilder()
+                .withTitle('PlayStation 5')
+                .withDescription('Console nouvelle génération')
+                .withPrice(499.99)
+                .build();
             const saveResult = await repository.save(product);
             let savedId: number = 0;
             saveResult.ifRight(p => { savedId = p.id; });
@@ -119,8 +119,8 @@ describe('ProductRepository - Tests unitaires avec base de données en mémoire'
     describe('findAll()', () => {
         test('doit retourner Right avec tous les produits', async () => {
             // Étant donné plusieurs produits sauvegardés
-            const product1 = new Product({ title: 'Xbox Series X', description: 'Console Microsoft', price: 499 });
-            const product2 = new Product({ title: 'Nintendo Switch', description: 'Console Nintendo', price: 299 });
+            const product1 = new ProductBuilder().withTitle('Xbox Series X').withDescription('Console Microsoft').withPrice(499).build();
+            const product2 = new ProductBuilder().withTitle('Nintendo Switch').withDescription('Console Nintendo').withPrice(299).build();
 
             await repository.save(product1);
             await repository.save(product2);
@@ -155,11 +155,11 @@ describe('ProductRepository - Tests unitaires avec base de données en mémoire'
     describe('update()', () => {
         test('doit mettre à jour un produit existant et retourner Right avec Maybe.of(product)', async () => {
             // Étant donné un produit sauvegardé
-            const product = new Product({
-                title: 'Steam Deck',
-                description: 'Console portable PC',
-                price: 399
-            });
+            const product = new ProductBuilder()
+                .withTitle('Steam Deck')
+                .withDescription('Console portable PC')
+                .withPrice(399)
+                .build();
             const saveResult = await repository.save(product);
             let savedId: number = 0;
             saveResult.ifRight(p => { savedId = p.id; });

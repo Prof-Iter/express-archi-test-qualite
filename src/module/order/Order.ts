@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
 import { Product } from '../product/Product';
+import { Either, Left, Right } from 'purify-ts/Either';
 
 @Entity()
 export class Order {
@@ -11,22 +12,25 @@ export class Order {
     @JoinColumn()
     public product: Product;
 
-    @Column({type: "int"})
+    @Column({ type: "int" })
     public quantity: number;
 
-    @Column({type: "float"})
+    @Column({ type: "float" })
     public totalPrice: number;
 
-    constructor({product, quantity}: {product: Product, quantity: number}) {
+    constructor({ product, quantity, totalPrice }: { product: Product, quantity: number, totalPrice: number }) {
         this.product = product;
         this.quantity = quantity;
+        this.totalPrice = totalPrice;
+    }
 
+    static create({ product, quantity }: { product: Product, quantity: number }): Either<Error, Order> {
         const total = product.price * quantity;
 
         if (total >= 200) {
-            throw new Error("le prix par commande doit être inférieur à 200€");
+            return Left(new Error("le prix par commande doit être inférieur à 200€"));
         }
 
-        this.totalPrice = total;
+        return Right(new Order({ product, quantity, totalPrice: total }));
     }
 }

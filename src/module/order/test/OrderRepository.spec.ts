@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import { DataSource } from 'typeorm';
 import { Order } from '../Order';
-import { Product } from '../../product/Product';
+import { Product, ProductBuilder } from '../../product/Product';
 import { OrderTypeOrmRepository } from '../OrderTypeOrmRepository';
 
 describe('OrderRepository - Tests unitaires avec base de données en mémoire', () => {
@@ -28,7 +28,11 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
         repository = new OrderTypeOrmRepository();
 
         // Create a test product for use in tests
-        testProduct = new Product({ title: 'Test Product', description: 'Test Description', price: 75 });
+        testProduct = new ProductBuilder()
+            .withTitle('Test Product')
+            .withDescription('Test Description')
+            .withPrice(75)
+            .build();
         await dataSource.getRepository(Product).save(testProduct);
     });
 
@@ -46,7 +50,9 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('save()', () => {
         test('doit sauvegarder une nouvelle commande et retourner Right avec la commande sauvegardée', async () => {
             // Étant donné une nouvelle commande valide
-            const order = new Order({ product: testProduct, quantity: 2 });
+            const orderResult = Order.create({ product: testProduct, quantity: 2 });
+            expect(orderResult.isRight()).toBe(true);
+            const order = orderResult.extract() as Order;
 
             // Quand on la sauvegarde
             const result = await repository.save(order);
@@ -63,24 +69,28 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
 
         test('doit retourner Left en cas d\'erreur de validation du domaine', async () => {
             // Étant donné une commande invalide (prix total >= 200)
-            const expensiveProduct = new Product({ title: 'Expensive', description: 'Expensive Product', price: 100 });
+            const expensiveProduct = new ProductBuilder()
+                .withTitle('Expensive')
+                .withDescription('Expensive Product')
+                .withPrice(100)
+                .build();
             await dataSource.getRepository(Product).save(expensiveProduct);
 
-            try {
-                new Order({ product: expensiveProduct, quantity: 2 });
-            } catch (error) {
-                // Le constructeur lève une erreur pour les validations de domaine
-                expect(error).toBeInstanceOf(Error);
-                expect((error as Error).message).toBe("le prix par commande doit être inférieur à 200€");
-            }
+            const result = Order.create({ product: expensiveProduct, quantity: 2 });
+            
+            // Alors le résultat doit être Left
+            expect(result.isLeft()).toBe(true);
+            result.mapLeft(error => {
+                expect(error.message).toBe("le prix par commande doit être inférieur à 200€");
+            });
         });
     });
 
     describe('findById()', () => {
         test('doit retourner Right avec Maybe.of(order) quand la commande existe', async () => {
             // Étant donné une commande sauvegardée
-            const order = new Order({ product: testProduct, quantity: 2 });
-            const saveResult = await repository.save(order);
+            const orderResult = Order.create({ product: testProduct, quantity: 2 });
+            const saveResult = await repository.save(orderResult.extract() as Order);
             let savedId: number = 0;
             saveResult.ifRight(o => { savedId = o.id; });
 
@@ -117,8 +127,8 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('findAll()', () => {
         test('doit retourner Right avec toutes les commandes', async () => {
             // Étant donné plusieurs commandes sauvegardées
-            const order1 = new Order({ product: testProduct, quantity: 1 });
-            const order2 = new Order({ product: testProduct, quantity: 2 });
+            const order1 = Order.create({ product: testProduct, quantity: 1 }).extract() as Order;
+            const order2 = Order.create({ product: testProduct, quantity: 2 }).extract() as Order;
 
             await repository.save(order1);
             await repository.save(order2);
@@ -153,7 +163,7 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('update()', () => {
         test('doit mettre à jour une commande existante et retourner Right avec Maybe.of(order)', async () => {
             // Étant donné une commande sauvegardée
-            const order = new Order({ product: testProduct, quantity: 1 });
+            const order = Order.create({ product: testProduct, quantity: 1 }).extract() as Order;
             const saveResult = await repository.save(order);
             let savedId: number = 0;
             saveResult.ifRight(o => { savedId = o.id; });
@@ -196,7 +206,7 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
     describe('delete()', () => {
         test('doit supprimer une commande existante et retourner Right(true)', async () => {
             // Étant donné une commande sauvegardée
-            const order = new Order({ product: testProduct, quantity: 1 });
+            const order = Order.create({ product: testProduct, quantity: 1 }).extract() as Order;
             const saveResult = await repository.save(order);
             let savedId: number = 0;
             saveResult.ifRight(o => { savedId = o.id; });

@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { Product } from '../../../product/Product';
+import { ProductBuilder } from '../../../product/Product';
 import CreateOrderUseCase from '../createOrderUseCase';
 import { OrderRepositoryInMemory, OrderRepositoryFail } from '../../test/fakes/OrderRepositoryFakes';
 import { ProductRepositoryInMemory } from '../../../product/test/fakes/ProductRepositoryFakes';
@@ -10,8 +10,12 @@ describe("US-3 : Créer une commande",  () => {
 
         // Étant donné qu'il n'y a pas de commande enregistrée
         // et qu'un produit existe avec l'id 1 et un prix de 75€
-        const product1 = new Product({title: "test", description: "test", price: 75});
-        product1.id = 1;
+        const product1 = new ProductBuilder()
+            .withTitle("test")
+            .withDescription("test")
+            .withPrice(75)
+            .withId(1)
+            .build();
         
         const orderRepository = new OrderRepositoryInMemory();
         const productRepository = new ProductRepositoryInMemory([product1]);
@@ -36,8 +40,12 @@ describe("US-3 : Créer une commande",  () => {
 
         // Étant donné qu'il n'y a pas de commande enregistrée
         // et qu'un produit existe avec l'id 2 et un prix de 100€
-        const product2 = new Product({title: "test2", description: "test2", price: 100});
-        product2.id = 2;
+        const product2 = new ProductBuilder()
+            .withTitle("test2")
+            .withDescription("test2")
+            .withPrice(100)
+            .withId(2)
+            .build();
 
         const orderRepository = new OrderRepositoryInMemory();
         const productRepository = new ProductRepositoryInMemory([product2]);
@@ -72,8 +80,12 @@ describe("US-3 : Créer une commande",  () => {
 
     test("Scénario 4 : échec, erreur lors de la sauvegarde", async () => {
         // Étant donné qu'un produit existe
-        const product = new Product({title: "test", description: "test", price: 50});
-        product.id = 1;
+        const product = new ProductBuilder()
+            .withTitle("test")
+            .withDescription("test")
+            .withPrice(50)
+            .withId(1)
+            .build();
         const productRepository = new ProductRepositoryInMemory([product]);
         
         // Et que le repository de commande échoue

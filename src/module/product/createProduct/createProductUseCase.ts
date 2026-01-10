@@ -12,23 +12,22 @@ export class CreateProductUseCase {
 
     async execute({title, description, price}: {title: string, description: string, price: number}): Promise<Either<Error, Product>> {
 
-        // Validate and create product (domain validation happens in constructor)
-        try {
-            const product = new Product({title, description, price});
+        const productResult = Product.create({title, description, price});
 
-            // Save product using repository
-            const saveResult = await this.productRepository.save(product);
-
-            // Return the result (Either<Error, Product>)
-            return saveResult.mapLeft(_ =>
-                new Error("erreur lors de la création du produit")
-            );
-        } catch (error) {
-            // Domain validation errors from Product constructor
-            if (error instanceof Error) {
-                return Left(error);
-            }
-            return Left(new Error("erreur lors de la création du produit"));
+        if (productResult.isLeft()) {
+            return productResult;
         }
+
+        const product = productResult.extract() as Product;
+        const saveResult = await this.productRepository.save(product);
+
+        return saveResult.mapLeft(error => {
+            if (error.message === "titre trop court" || 
+                error.message === "le prix doit être supérieur à 0" || 
+                error.message === "le prix doit être inférieur à 10000") {
+                return error;
+            }
+            return new Error("erreur lors de la création du produit");
+        });
     }
 }
