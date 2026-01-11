@@ -24,8 +24,8 @@ src/module/{domain}/{useCase}/
 ├── {useCase}Repository.ts         # Repository interface (port)
 ├── {useCase}TypeOrmRepository.ts  # TypeORM implementation (adapter)
 └── test/
-    ├── {useCase}.spec.ts          # Unit tests
-    └── {useCase}.e2e.spec.ts      # E2E tests with real database
+    ├── {useCase}.spec.ts          # BDD with DSL tests
+ 
 ```
 
 ### Key Principles
@@ -75,11 +75,18 @@ src/module/{domain}/{useCase}/
 - `npm run dev`: Starts the development server with nodemon.
 - `npm start`: Starts the production server.
 - `npm test`: Runs all tests once.
+- `npm run test:watch`: Runs tests in watch mode.
+
+## 🧹 Linter
+
+- `npm run lint`: Runs ESLint on the codebase.
+- `npm run lint:fix`: Runs ESLint and fixes any issues it can automatically fix.
 
 ## 🧪 Testing Strategy
 
 - **Unit Tests (`*.spec.ts`)**: Focus on business logic in Use Cases and Entities using mocks/dummies for repositories.
-- **E2E Tests (`*.e2e.spec.ts`)**: Test the full HTTP cycle using Supertest and a real PostgreSQL instance running in a Docker container (via Testcontainers).
+- **BDD with DSL (`*.spec.ts`)**: Focus on business logic in Use Cases and Entities using mocks/dummies using fluent DSL , adapted for Product Owners
+- **(disabled)  E2E Tests (`*.e2e.spec.ts`)**: Test the full HTTP cycle using Supertest and a real PostgreSQL instance running in a Docker container (via Testcontainers).
 
 ## 🛠️ Development Guidelines
 
