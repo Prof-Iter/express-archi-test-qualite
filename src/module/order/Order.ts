@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
 import { Product } from '../product/Product';
 import { Either, Left, Right } from 'purify-ts/Either';
+import { ERROR_KEYS } from "../../shared/i18n/errorKeys";
 
 @Entity()
 export class Order {
@@ -28,7 +29,7 @@ export class Order {
         const total = product.price * quantity;
 
         if (total >= 200) {
-            return Left(new Error("le prix par commande doit être inférieur à 200€"));
+            return Left(new Error(ERROR_KEYS.ORDER_PRICE_TOO_HIGH));
         }
 
         return Right(new Order({ product, quantity, totalPrice: total }));
@@ -36,8 +37,8 @@ export class Order {
 }
 
 export class OrderBuilder {
-    private props: { product: Product, quantity: number, totalPrice: number } = {
-        product: null as any,
+    private props: { product: Product | null, quantity: number, totalPrice: number } = {
+        product: null,
         quantity: 1,
         totalPrice: 0
     };
@@ -70,7 +71,10 @@ export class OrderBuilder {
     }
 
     build(): Order {
-        const order = new Order(this.props);
+        if (!this.props.product) {
+            throw new Error("Product must be set before building Order");
+        }
+        const order = new Order(this.props as { product: Product, quantity: number, totalPrice: number });
         if (this.id !== undefined) {
             order.id = this.id;
         }

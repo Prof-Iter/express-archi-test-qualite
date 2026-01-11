@@ -3,6 +3,7 @@ import { Maybe } from 'purify-ts/Maybe';
 import { OrderRepository } from './OrderRepository';
 import { Order } from './Order';
 import AppDataSource from '../../config/db.config';
+import { ERROR_KEYS } from '../../shared/i18n/errorKeys';
 
 /**
  * OrderTypeOrmRepository - TypeORM implementation of OrderRepository
@@ -17,8 +18,8 @@ export class OrderTypeOrmRepository implements OrderRepository {
             const repository = AppDataSource.getRepository<Order>(Order);
             const savedOrder = await repository.save(order);
             return Right(savedOrder);
-        } catch (error) {
-            return Left(new Error(`Erreur lors de la sauvegarde de la commande: ${error instanceof Error ? error.message : 'erreur inconnue'}`));
+        } catch (_error) {
+            return Left(new Error(ERROR_KEYS.ORDER_SAVE_ERROR));
         }
     }
 
@@ -27,8 +28,8 @@ export class OrderTypeOrmRepository implements OrderRepository {
             const repository = AppDataSource.getRepository<Order>(Order);
             const order = await repository.findOne({ where: { id }, relations: ['product'] });
             return Right(Maybe.fromNullable(order));
-        } catch (error) {
-            return Left(new Error(`Erreur lors de la recherche de la commande par ID: ${error instanceof Error ? error.message : 'erreur inconnue'}`));
+        } catch (_error) {
+            return Left(new Error(ERROR_KEYS.REPOSITORY_ERROR));
         }
     }
 
@@ -37,8 +38,8 @@ export class OrderTypeOrmRepository implements OrderRepository {
             const repository = AppDataSource.getRepository<Order>(Order);
             const orders = await repository.find({ relations: ['product'] });
             return Right(orders);
-        } catch (error) {
-            return Left(new Error(`Erreur lors de la récupération des commandes: ${error instanceof Error ? error.message : 'erreur inconnue'}`));
+        } catch (_error) {
+            return Left(new Error(ERROR_KEYS.REPOSITORY_ERROR));
         }
     }
 
@@ -61,8 +62,8 @@ export class OrderTypeOrmRepository implements OrderRepository {
             // Save updated order
             const updatedOrder = await repository.save(existingOrder);
             return Right(Maybe.of(updatedOrder));
-        } catch (error) {
-            return Left(new Error(`Erreur lors de la mise à jour de la commande: ${error instanceof Error ? error.message : 'erreur inconnue'}`));
+        } catch (_error) {
+            return Left(new Error(ERROR_KEYS.REPOSITORY_ERROR));
         }
     }
 
@@ -74,8 +75,8 @@ export class OrderTypeOrmRepository implements OrderRepository {
             // affected is the number of rows affected, or undefined
             const deleted = (result.affected !== undefined && result.affected > 0);
             return Right(deleted);
-        } catch (error) {
-            return Left(new Error(`Erreur lors de la suppression de la commande: ${error instanceof Error ? error.message : 'erreur inconnue'}`));
+        } catch (_error) {
+            return Left(new Error(ERROR_KEYS.REPOSITORY_ERROR));
         }
     }
 }

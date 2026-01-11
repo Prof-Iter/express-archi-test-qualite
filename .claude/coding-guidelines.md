@@ -18,11 +18,12 @@ Always write tests first, then implement the code. Whenever it's unit test, acce
  - follow the Unix Philosophy, applied to classes and functions (small, focused, single responsibility)
  - favor the use of functional programming
  - don't hesitate to suggest the use of existing libraries instead of reinventing the wheel 
- - Builder pattern for tests,  do not use directly constructors of entities in tests.
+ - Builder pattern for tests, do not use directly constructors of entities in tests.
  - `create()` should be used only in UseCases for initial entity creation.
  - Always use the Builder pattern in tests for entity instantiation (except when testing the `create()` method's validation logic).
  - Constructors must not contain any logic and should never throw exceptions.
  - favor the use of dependency injection
+ - favor the use of the i18n system
 
 ### the Repository pattern
  - one interface per repository
@@ -107,7 +108,7 @@ The project employs a dual-layered testing strategy to ensure both logic correct
 
 ### Language
 - **Code Identifiers**: English (variables, functions, classes).
-- **Messages & Documentation**: French (error messages, test descriptions, comments).
+- **Messages & Documentation**: Error keys in English, French translations handled at the UI/Controller layer. Test descriptions and comments in French.
 
 ### Naming
 - **Use Cases**: `{Action}{Entity}UseCase` (e.g., `CreateProductUseCase`).
@@ -115,6 +116,6 @@ The project employs a dual-layered testing strategy to ensure both logic correct
 - **Controllers**: `{action}{Entity}Controller.ts`.
 
 ### Error Handling
-- **Domain Layer**: Throw specific errors for validation failures.
-- **Application Layer**: Use cases may wrap or re-throw errors with context.
-- **Infrastructure/Controller Layer**: Catch errors and map them to appropriate HTTP status codes (400 for validation, 500 for internal errors).
+- **Domain & Use Case Layer**: Use constant error keys (see `src/shared/i18n/errorKeys.ts`) and return them via `Either` (Left).
+- **UI/Controller Layer**: Use the `translate()` utility to convert error keys into localized messages (French) for the user.
+- **HTTP Status**: Map errors to appropriate HTTP status codes (400 for domain/validation errors, 500 for internal errors).

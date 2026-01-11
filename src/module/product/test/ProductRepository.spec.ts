@@ -2,6 +2,7 @@ import { describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/g
 import { DataSource } from 'typeorm';
 import { Product, ProductBuilder } from '../Product';
 import { ProductTypeOrmRepository } from '../ProductTypeOrmRepository';
+import { ERROR_KEYS } from '../../../shared/i18n/errorKeys';
 
 describe('ProductRepository - Tests unitaires avec base de données en mémoire', () => {
     let dataSource: DataSource;
@@ -71,7 +72,7 @@ describe('ProductRepository - Tests unitaires avec base de données en mémoire'
             // Alors le résultat doit être Left
             expect(result.isLeft()).toBe(true);
             result.mapLeft(error => {
-                expect(error.message).toBe('le prix doit être supérieur à 0');
+                expect(error.message).toBe(ERROR_KEYS.PRODUCT_PRICE_TOO_LOW);
             });
         });
     });

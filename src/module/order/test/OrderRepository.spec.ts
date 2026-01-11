@@ -2,6 +2,7 @@ import { describe, expect, test, beforeAll, afterAll, beforeEach } from '@jest/g
 import { DataSource } from 'typeorm';
 import { Order, OrderBuilder } from '../Order';
 import { Product, ProductBuilder } from '../../product/Product';
+import { ERROR_KEYS } from '../../../shared/i18n/errorKeys';
 import { OrderTypeOrmRepository } from '../OrderTypeOrmRepository';
 
 describe('OrderRepository - Tests unitaires avec base de données en mémoire', () => {
@@ -83,7 +84,7 @@ describe('OrderRepository - Tests unitaires avec base de données en mémoire', 
             // Alors le résultat doit être Left
             expect(result.isLeft()).toBe(true);
             result.mapLeft(error => {
-                expect(error.message).toBe("le prix par commande doit être inférieur à 200€");
+                expect(error.message).toBe(ERROR_KEYS.ORDER_PRICE_TOO_HIGH);
             });
         });
     });

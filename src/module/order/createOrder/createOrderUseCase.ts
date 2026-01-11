@@ -2,6 +2,7 @@ import { Either } from 'purify-ts/Either';
 import { Order } from '../Order';
 import { OrderRepository } from '../OrderRepository';
 import { ProductRepository } from '../../product/ProductRepository';
+import { ERROR_KEYS } from '../../../shared/i18n/errorKeys';
 
 export default class CreateOrderUseCase {
 
@@ -15,7 +16,7 @@ export default class CreateOrderUseCase {
 
         // @ts-ignore
         return productResult.chain(maybeProduct =>
-            maybeProduct.toEither(new Error("produit non trouvé"))
+            maybeProduct.toEither(new Error(ERROR_KEYS.PRODUCT_NOT_FOUND))
         ).chain(product => 
             Order.create({product, quantity})
         ).chain(async order => {

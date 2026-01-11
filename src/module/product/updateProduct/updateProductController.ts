@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 import {Request, Response} from "express";
 import { UpdateProductUseCase } from "./updateProductUseCase";
+import { translate } from "../../../shared/i18n/translator";
 
 router.put('/product/:id', async (request: Request, response: Response) => {
 
@@ -18,7 +19,7 @@ router.put('/product/:id', async (request: Request, response: Response) => {
     return result.caseOf({
         Left: (error: Error) => {
             // Return 400 for all errors (domain validation, not found, or repository errors)
-            return response.status(400).json({message: error.message});
+            return response.status(400).json({message: translate(error.message)});
         },
         Right: (product) => {
             return response.status(200).json(product);

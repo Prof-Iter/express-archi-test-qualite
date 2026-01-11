@@ -1,6 +1,7 @@
 import {describe, expect, test} from "@jest/globals";
 import {CreateProductUseCase} from "../createProductUseCase";
 import { ProductRepositoryDummy, ProductRepositoryFail } from "../../test/fakes/ProductRepositoryFakes";
+import { ERROR_KEYS } from "../../../../shared/i18n/errorKeys";
 
 describe("US-1 : Créer un produit",  () => {
 
@@ -34,7 +35,7 @@ describe("US-1 : Créer un produit",  () => {
         // Alors une erreur doit être retournée "titre trop court"
         expect(result.isLeft()).toBe(true);
         result.ifLeft(error => {
-            expect(error.message).toBe("titre trop court");
+            expect(error.message).toBe(ERROR_KEYS.PRODUCT_TITLE_TOO_SHORT);
         });
     });
 
@@ -51,7 +52,7 @@ describe("US-1 : Créer un produit",  () => {
         // Alors une erreur doit être retournée "le prix doit être supérieur à 0"
         expect(result.isLeft()).toBe(true);
         result.ifLeft(error => {
-            expect(error.message).toBe("le prix doit être supérieur à 0");
+            expect(error.message).toBe(ERROR_KEYS.PRODUCT_PRICE_TOO_LOW);
         });
     });
 
@@ -66,7 +67,7 @@ describe("US-1 : Créer un produit",  () => {
         // Alors une erreur doit être retournée "le prix doit être inférieur à 10000"
         expect(result.isLeft()).toBe(true);
         result.ifLeft(error => {
-            expect(error.message).toBe("le prix doit être inférieur à 10000");
+            expect(error.message).toBe(ERROR_KEYS.PRODUCT_PRICE_TOO_HIGH);
         });
     });
 

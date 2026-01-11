@@ -2,6 +2,7 @@ import {describe, expect, test} from "@jest/globals";
 import { UpdateProductUseCase } from "../updateProductUseCase";
 import { ProductRepositoryInMemory, ProductRepositoryFail } from "../../test/fakes/ProductRepositoryFakes";
 import {ProductBuilder} from "../../Product";
+import { ERROR_KEYS } from "../../../../shared/i18n/errorKeys";
 
 describe("UpdateProductUseCase",  () => {
 
@@ -43,7 +44,7 @@ describe("UpdateProductUseCase",  () => {
         // Alors une erreur doit être retournée "produit non trouvé"
         expect(result.isLeft()).toBe(true);
         result.ifLeft(error => {
-            expect(error.message).toBe("produit non trouvé");
+            expect(error.message).toBe(ERROR_KEYS.PRODUCT_NOT_FOUND);
         });
     });
 
@@ -66,7 +67,7 @@ describe("UpdateProductUseCase",  () => {
         // Alors une erreur de validation doit être retournée
         expect(result.isLeft()).toBe(true);
         result.ifLeft(error => {
-            expect(error.message).toBe("le prix doit être supérieur à 0");
+            expect(error.message).toBe(ERROR_KEYS.PRODUCT_PRICE_TOO_LOW);
         });
     });
 
@@ -89,7 +90,7 @@ describe("UpdateProductUseCase",  () => {
         // Alors une erreur de validation doit être retournée
         expect(result.isLeft()).toBe(true);
         result.ifLeft(error => {
-            expect(error.message).toBe("titre trop court");
+            expect(error.message).toBe(ERROR_KEYS.PRODUCT_TITLE_TOO_SHORT);
         });
     });
 
@@ -105,7 +106,7 @@ describe("UpdateProductUseCase",  () => {
         // Alors une erreur doit être retournée
         expect(result.isLeft()).toBe(true);
         result.ifLeft(error => {
-            expect(error.message).toBe("erreur lors de la recherche du produit");
+            expect(error.message).toBe(ERROR_KEYS.PRODUCT_FETCH_ERROR);
         });
     });
 

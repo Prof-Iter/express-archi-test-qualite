@@ -3,6 +3,7 @@ import { ProductBuilder } from '../../../product/Product';
 import CreateOrderUseCase from '../createOrderUseCase';
 import { OrderRepositoryInMemory, OrderRepositoryFail } from '../../test/fakes/OrderRepositoryFakes';
 import { ProductRepositoryInMemory } from '../../../product/test/fakes/ProductRepositoryFakes';
+import { ERROR_KEYS } from "../../../../shared/i18n/errorKeys";
 
 describe("US-3 : Créer une commande",  () => {
 
@@ -58,7 +59,7 @@ describe("US-3 : Créer une commande",  () => {
         // Alors une erreur doit être envoyée "le prix par commande doit être inférieur à 200€"
         expect(result.isLeft()).toBe(true);
         result.mapLeft(error => {
-            expect(error.message).toBe("le prix par commande doit être inférieur à 200€");
+            expect(error.message).toBe(ERROR_KEYS.ORDER_PRICE_TOO_HIGH);
         });
     });
 
@@ -74,7 +75,7 @@ describe("US-3 : Créer une commande",  () => {
         // Alors une erreur "produit non trouvé" doit être retournée
         expect(result.isLeft()).toBe(true);
         result.mapLeft(error => {
-            expect(error.message).toBe("produit non trouvé");
+            expect(error.message).toBe(ERROR_KEYS.PRODUCT_NOT_FOUND);
         });
     });
 

@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 import { Either, Left, Right } from 'purify-ts/Either';
+import { ERROR_KEYS } from "../../shared/i18n/errorKeys";
 
 @Entity()
 export class Product {
@@ -47,18 +48,18 @@ export class Product {
 
     private static validateTitle(title: string): Error | null {
         if (title.length < 3) {
-            return new Error("titre trop court");
+            return new Error(ERROR_KEYS.PRODUCT_TITLE_TOO_SHORT);
         }
         return null;
     }
 
     private static validatePrice(price: number): Error | null {
         if (price <= 0) {
-            return new Error("le prix doit être supérieur à 0");
+            return new Error(ERROR_KEYS.PRODUCT_PRICE_TOO_LOW);
         }
 
         if (price > 10000) {
-            return new Error("le prix doit être inférieur à 10000");
+            return new Error(ERROR_KEYS.PRODUCT_PRICE_TOO_HIGH);
         }
         return null;
     }

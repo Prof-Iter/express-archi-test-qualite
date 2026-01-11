@@ -1,6 +1,7 @@
-import { Either, Left } from 'purify-ts/Either';
+import { Either } from 'purify-ts/Either';
 import { ProductRepository } from "../ProductRepository";
 import { Product } from "../Product";
+import { ERROR_KEYS } from "../../../shared/i18n/errorKeys";
 
 export class UpdateProductUseCase {
 
@@ -12,12 +13,12 @@ export class UpdateProductUseCase {
         const findResult = await this.productRepository.findById(id);
 
         return findResult
-            .mapLeft(() => new Error("erreur lors de la recherche du produit"))
-            .chain(maybeProduct => maybeProduct.toEither(new Error("produit non trouvé")))
+            .mapLeft(() => new Error(ERROR_KEYS.PRODUCT_FETCH_ERROR))
+            .chain(maybeProduct => maybeProduct.toEither(new Error(ERROR_KEYS.PRODUCT_NOT_FOUND)))
             .chain(product => product.update({ title, description, price }))
             .chain(async updatedProduct => {
                 const saveResult = await this.productRepository.save(updatedProduct);
-                return saveResult.mapLeft(() => new Error("erreur lors de la mise à jour du produit"));
+                return saveResult.mapLeft(() => new Error(ERROR_KEYS.PRODUCT_UPDATE_ERROR));
             });
     }
 

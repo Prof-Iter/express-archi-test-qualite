@@ -138,10 +138,10 @@ Key E2E setup pattern from createProduct.e2e.spec.ts:14-40:
 
 ### Error Handling
 
-- Domain entities throw errors for validation failures with French error messages
-- Use cases catch repository errors and re-throw with user-friendly messages
+- Domain entities and Use Cases use constant error keys for validation failures (see `src/shared/i18n/errorKeys.ts`)
+- Controllers translate these keys into French (or other languages) using `translate()` before sending response
 - Controllers catch all errors and return appropriate HTTP status:
-  - 400 for domain validation errors
+  - 400 for domain validation errors and expected failures
   - 500 for unexpected errors
 - Error response format: `{message: string}`
 

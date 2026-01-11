@@ -1,4 +1,4 @@
-import { Either, Left } from 'purify-ts/Either';
+import { Either } from 'purify-ts/Either';
 import { ProductRepository } from "../ProductRepository";
 import { Product } from "../Product";
 
