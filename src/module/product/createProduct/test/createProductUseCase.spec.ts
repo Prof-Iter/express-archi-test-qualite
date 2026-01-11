@@ -17,6 +17,29 @@ describe("US-1 : Créer un produit", () => {
             });
     });
 
+    test("Scénario 1bis : création réussie avec Builder fluent", async () => {
+        const result = await createProductScenario()
+            .noProducts()
+/*            .when.creating.productWith
+                .title("Canon EOS R5")
+                .description("45MP Full-Frame Mirrorless, 8K video, IBIS, Dual card slots")
+                .price(3899)
+
+ */
+            .when.creating.productWith
+                .title("Sony Xperia 1 IV")
+                .description("48MP Full-Frame Mirrorless, 8K video, IBIS, Dual card slots")
+                .price( 499 )
+                .execute();
+
+        result.shouldSucceed()
+            .with.product(p => {
+                p.hasTitle("Sony Xperia 1 IV");
+
+                p.hasPrice(499);
+            });
+    });
+
     test('Scénario 2 : echec, titre trop court', async () => {
         const result = await createProductScenario()
             .noProducts()

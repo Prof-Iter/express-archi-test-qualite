@@ -1,4 +1,4 @@
-import { Product } from '../../../module/product/Product';
+import { Product, ProductBuilder } from '../../../module/product/Product';
 import { CreateProductUseCase } from '../../../module/product/createProduct/createProductUseCase';
 import { ProductRepositoryFail, ProductRepositoryInMemory } from '../../../module/product/test/fakes/ProductRepositoryFakes';
 import { ProductSuccessAssertion } from './ProductScenario';
@@ -52,28 +52,74 @@ class CreateProductGiven {
     }
 }
 
+class FluentProductBuilder {
+    private data: Partial<CreateProductInput> = {};
+
+    constructor(private readonly when: CreateProductWhen) {}
+
+    title(value: string): this {
+        this.data.title = value;
+        return this;
+    }
+
+    description(value: string): this {
+        this.data.description = value;
+        return this;
+    }
+
+    price(value: number): this {
+        this.data.price = value;
+        return this;
+    }
+
+    async execute(): Promise<CreateProductThen> {
+        const input = this.data as CreateProductInput;
+        return this.when.creating.product(input);
+    }
+}
+
 class CreateProductWhen {
     constructor(
         private readonly repositories: Map<string, Repository>,
         private readonly entities: Map<string, unknown[]>
     ) {}
 
-    get creating() {
-        return {
-            product: async (input: CreateProductInput): Promise<CreateProductThen> => {
-                const behavior = this.repositories.get('repositoryBehavior') as 'fail' | 'succeed' | undefined;
-                let productRepo;
+    private async executeProductCreation(input: CreateProductInput): Promise<CreateProductThen> {
+        const behavior = this.repositories.get('repositoryBehavior') as 'fail' | 'succeed' | undefined;
+        let productRepo;
 
-                if (behavior === 'fail') {
-                    productRepo = new ProductRepositoryFail();
+        if (behavior === 'fail') {
+            productRepo = new ProductRepositoryFail();
+        } else {
+            const products = this.repositories.get('products') as Product[] | undefined;
+            productRepo = new ProductRepositoryInMemory(products || []);
+        }
+
+        const useCase = new CreateProductUseCase(productRepo);
+        const result = await useCase.execute(input);
+        return new CreateProductThen(result, this.repositories, this.entities);
+    }
+
+    get creating() {
+        const self = this;
+        return {
+            product: async (input: CreateProductInput | ProductBuilder): Promise<CreateProductThen> => {
+                let productData: CreateProductInput;
+                if (input instanceof ProductBuilder) {
+                    const builtProduct = input.build();
+                    productData = {
+                        title: builtProduct.title,
+                        description: builtProduct.description,
+                        price: builtProduct.price
+                    };
                 } else {
-                    const products = this.repositories.get('products') as Product[] | undefined;
-                    productRepo = new ProductRepositoryInMemory(products || []);
+                    productData = input;
                 }
 
-                const useCase = new CreateProductUseCase(productRepo);
-                const result = await useCase.execute(input);
-                return new CreateProductThen(result, this.repositories, this.entities);
+                return self.executeProductCreation(productData);
+            },
+            get productWith(): FluentProductBuilder {
+                return new FluentProductBuilder(self);
             }
         };
     }
