@@ -18,7 +18,7 @@ export class ProductTypeOrmRepository implements ProductRepository {
             const repository = AppDataSource.getRepository<Product>(Product);
             const savedProduct = await repository.save(product);
             return Right(savedProduct);
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.PRODUCT_SAVE_ERROR));
         }
     }
@@ -28,7 +28,7 @@ export class ProductTypeOrmRepository implements ProductRepository {
             const repository = AppDataSource.getRepository<Product>(Product);
             const product = await repository.findOne({ where: { id } });
             return Right(Maybe.fromNullable(product));
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.PRODUCT_FETCH_ERROR));
         }
     }
@@ -38,7 +38,7 @@ export class ProductTypeOrmRepository implements ProductRepository {
             const repository = AppDataSource.getRepository<Product>(Product);
             const products = await repository.find();
             return Right(products);
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.PRODUCT_FETCH_ERROR));
         }
     }
@@ -62,7 +62,7 @@ export class ProductTypeOrmRepository implements ProductRepository {
             // Save updated product
             const updatedProduct = await repository.save(existingProduct);
             return Right(Maybe.of(updatedProduct));
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.PRODUCT_UPDATE_ERROR));
         }
     }
@@ -75,7 +75,7 @@ export class ProductTypeOrmRepository implements ProductRepository {
             // affected is the number of rows affected, or undefined
             const deleted = (result.affected !== undefined && result.affected > 0);
             return Right(deleted);
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.PRODUCT_DELETE_ERROR));
         }
     }

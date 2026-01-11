@@ -114,6 +114,10 @@ The project employs a dual-layered testing strategy to ensure both logic correct
 
 ## Code Conventions
 
+### linter
+on test code, it's ok to keep warnings, it's not production code
+
+
 ### Language
 - **Code Identifiers**: English (variables, functions, classes).
 - **Messages & Documentation**: Error keys in English, French translations handled at the UI/Controller layer. Test descriptions and comments in French.

@@ -18,7 +18,7 @@ export class OrderTypeOrmRepository implements OrderRepository {
             const repository = AppDataSource.getRepository<Order>(Order);
             const savedOrder = await repository.save(order);
             return Right(savedOrder);
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.ORDER_SAVE_ERROR));
         }
     }
@@ -28,7 +28,7 @@ export class OrderTypeOrmRepository implements OrderRepository {
             const repository = AppDataSource.getRepository<Order>(Order);
             const order = await repository.findOne({ where: { id }, relations: ['product'] });
             return Right(Maybe.fromNullable(order));
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.REPOSITORY_ERROR));
         }
     }
@@ -38,7 +38,7 @@ export class OrderTypeOrmRepository implements OrderRepository {
             const repository = AppDataSource.getRepository<Order>(Order);
             const orders = await repository.find({ relations: ['product'] });
             return Right(orders);
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.REPOSITORY_ERROR));
         }
     }
@@ -62,7 +62,7 @@ export class OrderTypeOrmRepository implements OrderRepository {
             // Save updated order
             const updatedOrder = await repository.save(existingOrder);
             return Right(Maybe.of(updatedOrder));
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.REPOSITORY_ERROR));
         }
     }
@@ -75,7 +75,7 @@ export class OrderTypeOrmRepository implements OrderRepository {
             // affected is the number of rows affected, or undefined
             const deleted = (result.affected !== undefined && result.affected > 0);
             return Right(deleted);
-        } catch (_error) {
+        } catch {
             return Left(new Error(ERROR_KEYS.REPOSITORY_ERROR));
         }
     }

@@ -122,7 +122,7 @@ class CreateProductDummyRepository implements CreateProductRepository {
 }
 ```
 
-#### E2E Tests (`.e2e.spec.ts`)
+#### (disabled) E2E Tests (`.e2e.spec.ts`)
 - Use @testcontainers/postgresql to spin up real PostgreSQL containers
 - Test full HTTP request/response cycle with supertest
 - Override `AppDataSource` with test container DataSource via `Object.assign()`
@@ -163,6 +163,9 @@ Notable tsconfig.json settings:
 - `target: "es5"` with `module: "commonjs"`
 
 ## Code Conventions
+
+### linter
+on test code, it's ok to keep warnings, it's not production code
 
 ### Language
 - Error messages and test descriptions in French
