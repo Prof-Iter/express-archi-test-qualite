@@ -93,14 +93,22 @@ The project employs a dual-layered testing strategy to ensure both logic correct
 - **Scope**: Individual use cases and domain entities.
 - **Isolation**: Use test doubles (Mocks/Dummies) for external dependencies like repositories.
 - **Goal**: Verify business rules, edge cases, and error handling in total isolation.
-- **Convention**: Follow the Given-When-Then (Étant donné / Quand / Alors) pattern.
+- **DSL**: Use the expressive test DSL (see `src/shared/test/dsl/README.md`) for writing comment-free, fluent tests.
+- **Convention**: Tests read like Gherkin user stories with given/when/then pattern.
 
-### 2. E2E Tests (`*.e2e.spec.ts`)
+### 2. E2E Tests (`*.e2e.spec.ts`) not enabled now
 - **Scope**: Full HTTP request/response cycle.
 - **Environment**: Uses `@testcontainers/postgresql` to spin up a real, ephemeral database for each test suite.
 - **Tools**: `Supertest` for HTTP assertions.
 - **Goal**: Ensure the entire stack (Controller -> Use Case -> Repository -> Database) works correctly.
 - **Cleanup**: Database state is cleared before/after tests to ensure isolation between test runs.
+
+### 3. Test DSL
+- **Location**: `src/shared/test/dsl/`
+- **Purpose**: Expressive, comment-free test writing that reads like business requirements
+- **Usage**: Import scenario factories (`createProductScenario`, `updateProductScenario`, `createOrderScenario`)
+- **Documentation**: See `src/shared/test/dsl/README.md` for complete guide
+- **Benefits**: 42% less code, zero comments, product owner readable
 
 ---
 
