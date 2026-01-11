@@ -1,4 +1,5 @@
 import { Either } from 'purify-ts/Either';
+import { expect } from '@jest/globals';
 
 export interface Repository {
     [key: string]: unknown;
@@ -100,7 +101,7 @@ export class SuccessAssertion<TOutput> {
         return this.result.extract() as TOutput;
     }
 
-    protected getRepository<T extends Repository>(name: string): T | undefined {
+    protected getRepository<T >(name: string): T | undefined {
         return this.repositories.get(name) as T | undefined;
     }
 
