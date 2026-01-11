@@ -1,5 +1,5 @@
 import { Order } from '../../../module/order/Order';
-import { ProductBuilder } from '../../../module/product/Product';
+import { Product, ProductBuilder } from '../../../module/product/Product';
 import { OrderRepository } from '../../../module/order/OrderRepository';
 import { GivenContext, WhenAction, SuccessAssertion } from './UseCaseScenario';
 import { Either } from 'purify-ts/Either';
@@ -23,7 +23,12 @@ export class OrderGivenContext<TUseCase, TInput, TOutput> extends GivenContext<T
         return this;
     }
 
-    product(config: ProductConfig): ProductForOrderBuilder<TUseCase, TInput, TOutput> {
+    noProducts(): this {
+        this.entities.set('products', []);
+        return this;
+    }
+
+    product(config: ProductConfig | ProductBuilder): ProductForOrderBuilder<TUseCase, TInput, TOutput> {
         return new ProductForOrderBuilder(this, config);
     }
 
@@ -54,28 +59,38 @@ export class OrderGivenContext<TUseCase, TInput, TOutput> extends GivenContext<T
 export class ProductForOrderBuilder<TUseCase, TInput, TOutput> {
     constructor(
         private readonly context: OrderGivenContext<TUseCase, TInput, TOutput>,
-        private readonly config: ProductConfig
+        private readonly config: ProductConfig | ProductBuilder
     ) {}
 
-    exists(): OrderGivenContext<TUseCase, TInput, TOutput> {
-        const product = new ProductBuilder()
-            .withTitle(this.config.title || "Default Title")
-            .withDescription(this.config.description || "Default Description")
-            .withPrice(this.config.price || 100)
-            .build();
+    private buildProduct(withId?: number): Product {
+        if (this.config instanceof ProductBuilder) {
+            // Use the provided builder directly
+            if (withId !== undefined) {
+                return this.config.withId(withId).build();
+            }
+            return this.config.build();
+        } else {
+            // Use inline config
+            const builder = new ProductBuilder()
+                .withTitle(this.config.title || "Default Title")
+                .withDescription(this.config.description || "Default Description")
+                .withPrice(this.config.price || 100);
 
+            if (withId !== undefined) {
+                builder.withId(withId);
+            }
+            return builder.build();
+        }
+    }
+
+    exists(): OrderGivenContext<TUseCase, TInput, TOutput> {
+        const product = this.buildProduct();
         this.context['addEntity']('products', product);
         return this.context;
     }
 
     existsWithId(id: number): OrderGivenContext<TUseCase, TInput, TOutput> {
-        const product = new ProductBuilder()
-            .withTitle(this.config.title || "Default Title")
-            .withDescription(this.config.description || "Default Description")
-            .withPrice(this.config.price || 100)
-            .withId(id)
-            .build();
-
+        const product = this.buildProduct(id);
         this.context['addEntity']('products', product);
         return this.context;
     }

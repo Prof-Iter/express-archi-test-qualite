@@ -25,8 +25,10 @@ A fluent, expressive DSL (Domain-Specific Language) for writing use case tests t
 
 - **Expressive over concise** - Prioritize readability
 - **Fluent over functional** - Chain methods naturally
-- **Inline configuration** - Simple scenarios need simple setup
-- **Builder pattern** - Complex scenarios use builders
+- **Dual approach for test data**:
+  - **Inline configuration** - Simple scenarios use inline config for conciseness
+  - **Explicit Builders** - Complex scenarios use Builders for visibility of test data
+- **Test data visibility** - When test data is important to understand the scenario, make it explicit with Builders
 - **Type inference** - Let TypeScript infer types where possible
 
 ## Quick Start
@@ -143,6 +145,106 @@ Factory function for creating order scenarios.
 - `o.hasProductId(expected)` - Assert product ID matches
 - `o.hasQuantity(expected)` - Assert quantity matches
 - `o.hasId(expected)` - Assert order ID matches
+
+## Builder Pattern: Inline vs Explicit
+
+The DSL supports two approaches for setting up test data, allowing you to choose based on context.
+
+### Approach 1: Inline Configuration (Concise)
+
+Use inline configuration when test data is simple and doesn't need explanation:
+
+```typescript
+test("simple product creation", async () => {
+    const result = await createProductScenario()
+        .noProducts()
+        .when.creating.product({ title: "USB Cable", description: "USB-C", price: 15 });
+
+    result.shouldSucceed();
+});
+```
+
+**When to use:**
+- Test data is self-explanatory
+- Values are simple (titles, prices without business meaning)
+- Focus is on the action, not the setup
+
+### Approach 2: Explicit Builder (Visible Test Data)
+
+Use explicit Builders when test data has business meaning or complexity:
+
+```typescript
+test("order exceeds price limit", async () => {
+    const expensiveProduct = new ProductBuilder()
+        .withTitle("Apple Vision Pro")
+        .withDescription("Spatial computing headset with M2 chip")
+        .withPrice(3499);  // Expensive - visible in test
+
+    const result = await createOrderScenario()
+        .product(expensiveProduct)
+            .existsWithId(1)
+        .and.noOrders()
+        .when.creating.order({ id: 1, quantity: 1 });  // 3499€ total
+
+    result.shouldFail()
+        .withError(ERROR_KEYS.ORDER_PRICE_TOO_HIGH);  // Exceeds 200€ limit
+});
+```
+
+**When to use:**
+- Test data explains *why* the test behaves a certain way
+- Product details are relevant to understanding business rules
+- Complex setup with multiple related attributes
+- Test data should be visible to product owners
+
+### Choosing the Right Approach
+
+**Use Inline** for:
+- Simple CRUD operations
+- Generic test data (e.g., "Product A", "Product B")
+- When the action is more important than the data
+
+**Use Builder** for:
+- Business rule validations (price limits, quantity constraints)
+- Complex products with meaningful descriptions
+- When test data explains the scenario
+- When you want product owners to see realistic data
+
+### Mixed Approach
+
+You can mix both in the same test suite:
+
+```typescript
+describe("Order scenarios", () => {
+    test("simple order", async () => {
+        // Inline for simplicity
+        const result = await createOrderScenario()
+            .product({ title: "test", price: 50 })
+                .existsWithId(1)
+            .when.creating.order({ id: 1, quantity: 2 });
+
+        result.shouldSucceed();
+    });
+
+    test("expensive order violates business rule", async () => {
+        // Builder shows why this fails
+        const luxuryItem = new ProductBuilder()
+            .withTitle("Diamond Ring")
+            .withDescription("2 carat, platinum setting")
+            .withPrice(5000);
+
+        const result = await createOrderScenario()
+            .product(luxuryItem)
+                .existsWithId(1)
+            .when.creating.order({ id: 1, quantity: 1 });
+
+        result.shouldFail()
+            .withError(ERROR_KEYS.ORDER_PRICE_TOO_HIGH);
+    });
+});
+```
+
+See [DSL.builder-example.spec.ts](./DSL.builder-example.spec.ts) for complete examples.
 
 ## Examples
 

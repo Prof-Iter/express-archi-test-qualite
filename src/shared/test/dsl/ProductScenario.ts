@@ -16,7 +16,7 @@ export class ProductGivenContext<TUseCase, TInput, TOutput> extends GivenContext
         return this;
     }
 
-    product(config: ProductConfig): ProductEntityBuilder<TUseCase, TInput, TOutput> {
+    product(config: ProductConfig | ProductBuilder): ProductEntityBuilder<TUseCase, TInput, TOutput> {
         return new ProductEntityBuilder(this, config);
     }
 
@@ -47,28 +47,38 @@ export class ProductGivenContext<TUseCase, TInput, TOutput> extends GivenContext
 export class ProductEntityBuilder<TUseCase, TInput, TOutput> {
     constructor(
         private readonly context: ProductGivenContext<TUseCase, TInput, TOutput>,
-        private readonly config: ProductConfig
+        private readonly config: ProductConfig | ProductBuilder
     ) {}
 
-    exists(): ProductGivenContext<TUseCase, TInput, TOutput> {
-        const product = new ProductBuilder()
-            .withTitle(this.config.title || "Default Title")
-            .withDescription(this.config.description || "Default Description")
-            .withPrice(this.config.price || 100)
-            .build();
+    private buildProduct(withId?: number): Product {
+        if (this.config instanceof ProductBuilder) {
+            // Use the provided builder directly
+            if (withId !== undefined) {
+                return this.config.withId(withId).build();
+            }
+            return this.config.build();
+        } else {
+            // Use inline config
+            const builder = new ProductBuilder()
+                .withTitle(this.config.title || "Default Title")
+                .withDescription(this.config.description || "Default Description")
+                .withPrice(this.config.price || 100);
 
+            if (withId !== undefined) {
+                builder.withId(withId);
+            }
+            return builder.build();
+        }
+    }
+
+    exists(): ProductGivenContext<TUseCase, TInput, TOutput> {
+        const product = this.buildProduct();
         this.context['addEntity']('products', product);
         return this.context;
     }
 
     existsWithId(id: number): ProductGivenContext<TUseCase, TInput, TOutput> {
-        const product = new ProductBuilder()
-            .withTitle(this.config.title || "Default Title")
-            .withDescription(this.config.description || "Default Description")
-            .withPrice(this.config.price || 100)
-            .withId(id)
-            .build();
-
+        const product = this.buildProduct(id);
         this.context['addEntity']('products', product);
         return this.context;
     }

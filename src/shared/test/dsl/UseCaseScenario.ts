@@ -5,9 +5,6 @@ export interface Repository {
     [key: string]: unknown;
 }
 
-export interface EntityConfig {
-    [key: string]: unknown;
-}
 
 export class GivenContext<TUseCase, TInput, TOutput> {
     protected repositories: Map<string, Repository> = new Map();
