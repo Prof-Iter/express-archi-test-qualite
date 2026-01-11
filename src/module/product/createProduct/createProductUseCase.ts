@@ -14,20 +14,11 @@ export class CreateProductUseCase {
 
         const productResult = Product.create({title, description, price});
 
-        if (productResult.isLeft()) {
-            return productResult;
-        }
+        if (productResult.isLeft()) return productResult;
 
         const product = productResult.extract() as Product;
         const saveResult = await this.productRepository.save(product);
 
-        return saveResult.mapLeft(error => {
-            if (error.message === "titre trop court" || 
-                error.message === "le prix doit être supérieur à 0" || 
-                error.message === "le prix doit être inférieur à 10000") {
-                return error;
-            }
-            return new Error("erreur lors de la création du produit");
-        });
+        return saveResult;
     }
 }

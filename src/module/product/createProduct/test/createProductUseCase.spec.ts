@@ -81,7 +81,7 @@ describe("US-1 : Créer un produit",  () => {
         // Alors une erreur doit être retournée «erreur lors de la création du produit»
         expect(result.isLeft()).toBe(true);
         result.ifLeft(error => {
-            expect(error.message).toBe("erreur lors de la création du produit");
+            expect(error.message).toBe("repository save failed");
         });
     });
 

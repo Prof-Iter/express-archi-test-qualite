@@ -17,14 +17,12 @@ Always write tests first, then implement the code. Whenever it's unit test, acce
  - favor the use of design patterns
  - follow the Unix Philosophy, applied to classes and functions (small, focused, single responsibility)
  - favor the use of functional programming
- - favor the use of reactive programming
  - don't hesitate to suggest the use of existing libraries instead of reinventing the wheel 
  - Builder pattern for tests,  do not use directly constructors of entities in tests.
  - `create()` should be used only in UseCases for initial entity creation.
  - Always use the Builder pattern in tests for entity instantiation (except when testing the `create()` method's validation logic).
- - Constructors must not contain any logic, and never throw exceptions.
+ - Constructors must not contain any logic and should never throw exceptions.
  - favor the use of dependency injection
- - favor the use of the builder pattern
 
 ### the Repository pattern
  - one interface per repository
@@ -35,6 +33,13 @@ Always write tests first, then implement the code. Whenever it's unit test, acce
 
 ## Modern TypeScript style
 - use imports instead of require
+- remove brace for single line if/for/while/switch
+- favor the use of arrow functions
+- favor the use of const instead of let
+- favor the use of pattern matching
+- favor the use of union types instead of enums
+- favor the use of union types for nullable values
+- favor the use of intersection types for multiple nullable values
 - use async/await instead of promises
 - **Asynchronous Best Practices**: See `docs/async-await-best-practices.md` for a detailed guide on modern async/await patterns.
 
