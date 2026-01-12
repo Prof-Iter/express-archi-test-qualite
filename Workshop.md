@@ -55,7 +55,10 @@ Nous allons partir d'une base de code en **TypeScript**, avec un domaine métier
 ---
 
 ## 🛠 Pré-requis techniques
-- Node.js & NPM installés.
-- Un éditeur de code (VS Code recommandé).
-- Accès à une IA (Claude, ChatGPT, etc.) ou utilisation des outils intégrés au repo.
-- Connaissances de base en TypeScript et Jest.
+- participants au MOB:  rien, le Pilote écrira le code pour vous.
+- pour ceux qui veulent le faire sur leur machine :
+  - Node.js & NPM installés.
+  - Un éditeur de code (VS Code ou JetBrains recommandé).
+  - Accès à une IA (Claude, ChatGPT, etc.).
+  - Connaissances de base en TypeScript et Jest.
+  - Base de code également disponible en Kotlin et Java et C#
