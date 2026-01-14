@@ -17,7 +17,7 @@ Une session doit contenir :
 
   Un pack est un  harnais électronique avec un pistolet laser.
 
-Invariants métier:
+### Invariants métier:
 
  - Une seule session doit exister sur le créneau horaire.
  - le statut doit être “publié” par défaut.

@@ -20,5 +20,6 @@ export default [{
         }],
         "@typescript-eslint/no-explicit-any": "warn",
         "no-console": "off",
+        "complexity": ["warn", 10],
     },
 }];

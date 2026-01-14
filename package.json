@@ -7,7 +7,9 @@
     "start": "node index.js",
     "test": "jest --config ./jest.config.js",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "mutation-test": "stryker run",
+    "analyze": "npx cloc src && npx jscpd src && npx depcheck"
   },
   "author": "",
   "license": "ISC",
@@ -17,11 +19,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "mysql": "^2.18.1",
     "pg": "^8.16.0",
     "purify-ts": "^2.1.4",
-    "typeorm": "^0.3.20",
-    "wait-port": "^1.1.0"
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
@@ -30,6 +30,9 @@
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-typescript": "^7.26.0",
     "@jest/globals": "^29.7.0",
+    "@stryker-mutator/core": "^9.4.0",
+    "@stryker-mutator/jest-runner": "^9.4.0",
+    "@stryker-mutator/typescript-checker": "^9.4.0",
     "@testcontainers/postgresql": "^11.0.3",
     "@types/node": "^22.10.5",
     "@types/sql.js": "^1.4.9",

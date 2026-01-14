@@ -6,6 +6,7 @@ describe("US-1 : Créer un produit", () => {
 
     test("Scénario 1 : création réussie", async () => {
         const result = await createProductScenario()
+          //  .given()
             .noProducts()
             .when.creating.product({ title: "switch 2", description: "nouvelle console", price: 500 });
 
