@@ -58,9 +58,7 @@ DSLs are typically classified into two categories:
 
 External DSLs are standalone languages with their own syntax and parser. Examples include:
 
-- **Gherkin** (Cucumber): A language for behavior-driven development using Given-When-Then syntax.
-- **SQL**: A language for querying relational databases.
-- **Terraform**: A language for infrastructure-as-code.
+- **Gherkin** (Cucumber): A language for behavior-driven development using Given-When-Then syntax, enabling non-technical stakeholders to write executable specifications.
 
 **Advantages:**
 - Complete syntactic freedom.
@@ -77,6 +75,11 @@ External DSLs are standalone languages with their own syntax and parser. Example
 Internal DSLs are implemented within an existing host language, leveraging the host's syntax and runtime. Examples include:
 
 - **Fluent interfaces** in Java or TypeScript (method chaining for readable code).
+- **Kotest** (Kotlin): A testing framework offering multiple testing styles as internal DSLs:
+  - **ShouldSpec**: Similar to FunSpec but uses `should()` keyword for more readable assertions.
+  - **BehaviorSpec**: Implements BDD-style testing with `given()`, `when()`, `then()` keywords for behavior-driven specifications. **Most adapted for DSL design** due to its explicit BDD structure, semantic clarity, and support for nested contexts and `and()` keywords.
+  - **DescribeSpec**: Familiar to Ruby/JavaScript developers, uses `describe()` and `it()` keywords.
+  - **WordSpec**: Uses infix notation with `should` keyword for concise, fluent test expressions.
 - **Scala DSLs** using operator overloading and implicit conversions.
 - **Ruby DSLs** leveraging metaprogramming and blocks.
 
@@ -109,11 +112,13 @@ A well-designed DSL often sits atop an API, providing a more expressive interfac
 
 ## 3. Purpose and Benefits of DSLs
 
-### 3.1 Primary Use Cases
+### 3.1 Primary Use Case: Executable Specifications from User Stories
 
-#### 3.1.1 Testing and Specification
+DSLs designed for executable specifications bridge the gap between business requirements and automated tests. They enable stakeholders to express behavior in a format that is both human-readable and machine-executable.
 
-DSLs are extensively used in testing frameworks to express test scenarios in a readable, executable format. The Gherkin language popularized this approach through Behavior-Driven Development (BDD):
+#### 3.1.1 Behavior-Driven Development (BDD)
+
+BDD DSLs use the Given-When-Then pattern to express user stories as executable specifications:
 
 ```gherkin
 Given no sessions exist on the chosen time slot
@@ -121,31 +126,33 @@ When staff creates a session with a future date, duration, available packs, and 
 Then the session is created with status "published" and all values are recorded
 ```
 
-This format bridges the gap between business analysts and developers, enabling non-technical stakeholders to read and potentially write test specifications.
+This format bridges the gap between business analysts and developers, enabling non-technical stakeholders to read and potentially write test specifications. The specification becomes the test, eliminating the need to maintain separate documentation.
 
-#### 3.1.2 Configuration and Infrastructure
+#### 3.1.2 Fluent Test DSLs
 
-DSLs simplify configuration management by providing domain-specific abstractions:
+Fluent interfaces enable developers to write tests that read like specifications:
 
-- **Terraform** allows infrastructure engineers to define cloud resources declaratively.
-- **Docker Compose** provides a YAML-based DSL for multi-container applications.
-- **Kubernetes manifests** define containerized application deployments.
+```typescript
+await createSessionScenario()
+    .noSessions()
+    .when.creating.sessionWith
+        .date(sessionDate)
+        .duration(30)
+        .availablePacks(20)
+        .price(15)
+        .execute()
+    .shouldSucceed()
+    .with.session(s => {
+        s.hasDate(sessionDate);
+        s.hasDuration(30);
+        s.hasAvailablePacks(20);
+        s.hasReservedPacks(0);
+        s.hasPrice(15);
+        s.hasStatus('publié');
+    });
+```
 
-#### 3.1.3 Data Transformation and Querying
-
-DSLs enable intuitive data manipulation:
-
-- **SQL** provides a declarative language for relational data queries.
-- **XPath/XQuery** navigate and transform XML documents.
-- **jq** filters and transforms JSON data.
-
-#### 3.1.4 Domain Modeling
-
-In complex domains, DSLs facilitate the expression of domain-specific concepts:
-
-- **Event Sourcing DSLs** model state transitions and events.
-- **Workflow DSLs** define business process orchestration.
-- **Rules Engines** express complex business logic declaratively.
+These DSLs provide a natural language-like syntax for expressing test scenarios while maintaining full type safety and IDE support.
 
 ### 3.2 Benefits
 
@@ -954,6 +961,177 @@ When designing a new DSL, consider the following:
 - [ ] **Performance**: Does the DSL introduce unacceptable performance overhead?
 - [ ] **Tooling**: Does the DSL integrate with existing development tools?
 - [ ] **Maintenance**: Is there a clear plan for DSL maintenance and evolution?
+
+---
+
+## Appendix B: DSLs for Executable Specifications
+
+This appendix provides an overview of DSLs specifically designed for writing executable specifications from user stories.
+
+### B.1 External DSLs for Executable Specifications
+
+#### B.1.1 Gherkin (Cucumber)
+
+Gherkin is the most widely-adopted external DSL for behavior-driven development. It uses the Given-When-Then pattern to express user stories as executable specifications.
+
+**Example:**
+```gherkin
+Feature: Session Management
+  Scenario: Create a valid session
+    Given no sessions exist on the chosen time slot
+    When staff creates a session with a future date, duration, available packs, and price
+    Then the session is created with status "published" and all values are recorded
+```
+
+**Characteristics:**
+- Human-readable syntax accessible to non-technical stakeholders
+- Given-When-Then structure maps directly to test setup, action, and assertion
+- Step definitions bridge Gherkin expressions to implementation code
+- Extensive tool support (IDE plugins, CI/CD integration)
+- Multi-language support (Ruby, Java, Python, JavaScript, etc.)
+
+**Strengths:**
+- Low barrier to entry for business analysts
+- Encourages collaboration between technical and non-technical stakeholders
+- Specification and test are unified
+
+**Limitations:**
+- Step definitions can become complex and difficult to maintain
+- Manual mapping between Gherkin steps and code implementations
+- Gherkin's simplicity can be limiting for complex scenarios
+
+#### B.1.2 Website-spec
+
+Website-spec is an external DSL for functional web testing that enables non-technical users to define test scenarios for web applications without writing code.
+
+**Example:**
+```
+Open $url
+Click on create
+Select a store
+Within card-panel-store
+Select `[date-test=stores] label`
+Remember test as $StoreName
+Click Select button continue
+!Class should not contain "disabled"
+Click Select element `.preview-value`
+Property text should be $StoreName
+```
+
+**Characteristics:**
+- Domain-specific commands like "Click", "Select", "Open" that map to web interactions
+- Built-in assertions for web element properties
+- No need for developer-defined step definitions
+- Ideal for QA teams and business analysts
+
+### B.2 Internal DSLs for Executable Specifications
+
+#### B.2.1 RSpec (Ruby)
+
+RSpec is a Ruby testing framework that provides a fluent DSL for writing behavior-driven specifications.
+
+**Example:**
+```ruby
+describe "Session creation" do
+  context "with valid parameters" do
+    it "creates a session with published status" do
+      session = Session.create(
+        date: tomorrow,
+        duration: 30,
+        available_packs: 20,
+        price: 15
+      )
+      
+      expect(session).to be_persisted
+      expect(session.status).to eq('published')
+      expect(session.available_packs).to eq(20)
+    end
+  end
+end
+```
+
+**Characteristics:**
+- Fluent, readable syntax using `describe`, `context`, and `it` blocks
+- Chainable assertions with `expect()` syntax
+- Full access to Ruby language features
+- Extensive plugin ecosystem
+
+#### B.2.2 Kotest (Kotlin)
+
+Kotest is a Kotlin testing framework offering multiple testing styles as internal DSLs. **BehaviorSpec** is the most adapted for executable specifications.
+
+**Example:**
+```kotlin
+class SessionCreationSpec : BehaviorSpec({
+    context("Creating a session") {
+        given("no sessions exist on the chosen time slot") {
+            `when`("staff creates a session with valid parameters") {
+                then("the session is created with published status") {
+                    val session = createSession(
+                        date = tomorrow,
+                        duration = 30,
+                        availablePacks = 20,
+                        price = 15
+                    )
+                    
+                    session.status shouldBe "published"
+                    session.availablePacks shouldBe 20
+                }
+            }
+        }
+    }
+})
+```
+
+**Characteristics:**
+- BehaviorSpec implements BDD-style testing with `given()`, `when()`, `then()` keywords
+- Leverages Kotlin's extension functions and infix notation
+- Full type safety and IDE support
+- Supports nested contexts for complex scenarios
+
+#### B.2.3 Fluent Test DSLs (TypeScript/JavaScript)
+
+Custom fluent interfaces enable developers to write tests that read like specifications while maintaining type safety.
+
+**Example:**
+```typescript
+await createSessionScenario()
+    .noSessions()
+    .when.creating.sessionWith
+        .date(sessionDate)
+        .duration(30)
+        .availablePacks(20)
+        .price(15)
+        .execute()
+    .shouldSucceed()
+    .with.session(s => {
+        s.hasDate(sessionDate);
+        s.hasDuration(30);
+        s.hasAvailablePacks(20);
+        s.hasReservedPacks(0);
+        s.hasPrice(15);
+        s.hasStatus('publié');
+    });
+```
+
+**Characteristics:**
+- Method chaining for fluent, readable syntax
+- Full type safety and IDE autocomplete
+- Seamless integration with existing code
+- Custom domain-specific assertions
+- Builder pattern for complex test setup
+
+### B.3 Comparison of Approaches
+
+| Aspect | Gherkin | RSpec | Kotest BehaviorSpec | Fluent DSL |
+|--------|---------|-------|-------------------|-----------|
+| **Audience** | Business analysts, developers | Developers | Developers | Developers |
+| **Syntax Freedom** | Limited (external) | High (internal) | High (internal) | High (internal) |
+| **Type Safety** | None | Partial | Full | Full |
+| **IDE Support** | Good (plugins) | Excellent | Excellent | Excellent |
+| **Learning Curve** | Low | Medium | Medium | Medium |
+| **Extensibility** | Via step definitions | Via Ruby metaprogramming | Via Kotlin extensions | Via custom builders |
+| **Maintenance** | Step definitions can drift | Tightly coupled to code | Tightly coupled to code | Tightly coupled to code |
 
 ---
 
