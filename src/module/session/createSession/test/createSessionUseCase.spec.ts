@@ -7,16 +7,17 @@ describe("US-1 : Créer une session", () => {
         const sessionDate = new Date();
         sessionDate.setDate(sessionDate.getDate() + 1); // Tomorrow
 
-        const result = await createSessionScenario()
+
+        (await createSessionScenario()
             .noSessions()
             .when.creating.session({
                 date: sessionDate,
                 duration: 30,
                 availablePacks: 20,
                 price: 15
-            });
+            }))
 
-        result.shouldSucceed()
+        .shouldSucceed()
             .with.session(s => {
                 s.hasDate(sessionDate);
                 s.hasDuration(30);
