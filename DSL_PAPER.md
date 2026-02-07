@@ -519,7 +519,143 @@ Comprehensive documentation is essential for DSL adoption and correct AI generat
 - **Realistic Examples**: Provide examples covering common use cases.
 - **Best practices**: Document recommended patterns and anti-patterns.
 
-### 5.3 Standards and Libraries
+### 5.3 Property-Based Testing with DSLs
+
+Property-Based Testing (PBT) represents a powerful complement to example-based testing for validating DSL behavior across a wide input space. Rather than testing specific scenarios, PBT verifies that certain properties (invariants) hold true for all inputs within a domain.
+
+#### 5.3.1 Motivation for PBT in DSL Validation
+
+**Argument**: DSLs encode business rules as executable specifications. PBT ensures these rules hold universally, not just for handpicked examples.
+
+**Key Benefits**:
+- **Comprehensive validation**: Automatically generates hundreds of test cases, discovering edge cases developers might miss
+- **Business rule verification**: Validates that domain invariants hold across the entire valid input space
+- **DSL consistency checking**: Ensures the DSL behaves predictably (e.g., idempotence, commutativity)
+- **Regression prevention**: Once a property is defined, it's tested against infinite variations
+
+#### 5.3.2 Integration with Functional DSLs
+
+PBT aligns naturally with FP-based DSLs because both emphasize:
+- **Pure functions**: Deterministic DSL operations are trivially testable with random inputs
+- **Immutability**: Generated test data cannot be accidentally mutated during test execution
+- **Type safety**: Generators respect type constraints, ensuring only valid domain objects are created
+
+**Example**: Testing a product creation DSL with PBT:
+
+```typescript
+// Property: All valid products should be created successfully
+await forAllValidProducts()
+    .shouldAlwaysHold(async (productInput) => {
+        const result = await createProductScenario()
+            .noProducts()
+            .when.creating.product(productInput);
+
+        result.shouldSucceed()
+            .with.product(p => {
+                p.hasTitle(productInput.title);
+                p.hasPrice(productInput.price);
+            });
+    });
+```
+
+This single test validates the property for 100+ randomly generated valid products, each with different titles, descriptions, and prices within business constraints.
+
+#### 5.3.3 Domain-Friendly PBT DSL
+
+A critical challenge with PBT libraries like `fast-check` is their technical complexity. Raw PBT syntax (`fc.assert`, `fc.asyncProperty`, `fc.record`) creates a barrier for domain experts and increases cognitive load.
+
+**Solution**: Wrap PBT libraries in a domain-friendly DSL layer:
+
+```typescript
+// Before: Technical, verbose
+await fc.assert(
+    fc.asyncProperty(
+        fc.record({
+            title: fc.string({ minLength: 3, maxLength: 100 }),
+            price: fc.integer({ min: 0, max: 10000 })
+        }),
+        async (product) => { /* test logic */ }
+    ),
+    { numRuns: 100 }
+);
+
+// After: Domain-friendly, readable
+await forAllValidProducts()
+    .shouldAlwaysHold(async (product) => { /* test logic */ });
+```
+
+This approach:
+- **Hides technical complexity**: `fast-check` boilerplate is encapsulated
+- **Improves readability**: Tests read like business specifications
+- **Enables reuse**: Domain generators (`forAllValidProducts`) are defined once, used everywhere
+- **Facilitates AI generation**: Simpler syntax is easier for LLMs to generate correctly
+
+#### 5.3.4 Common Properties to Test
+
+When applying PBT to DSLs for executable specifications, several categories of properties emerge:
+
+1. **Validity properties**: "All valid inputs succeed"
+   ```typescript
+   forAllValidProducts().shouldAlwaysHold(async (p) => {
+       const result = await createProduct(p);
+       result.shouldSucceed();
+   });
+   ```
+
+2. **Invalidity properties**: "All invalid inputs fail with specific errors"
+   ```typescript
+   forAllProductsWithNegativePrice().shouldAlwaysHold(async (p) => {
+       const result = await createProduct(p);
+       result.shouldFail().withError(PRICE_TOO_LOW);
+   });
+   ```
+
+3. **Idempotence**: "Same input produces same output"
+   ```typescript
+   forAllValidProducts().shouldAlwaysHold(async (p) => {
+       const result1 = await createProduct(p);
+       const result2 = await createProduct(p);
+       expect(result1).toEqual(result2);
+   });
+   ```
+
+4. **Builder equivalence**: "Direct input ≡ Fluent builder"
+   ```typescript
+   forAllValidProducts().shouldAlwaysHold(async (p) => {
+       const direct = await createProduct(p);
+       const fluent = await createProductWith.title(p.title).price(p.price).execute();
+       expect(direct).toEqual(fluent);
+   });
+   ```
+
+#### 5.3.5 Practical Impact: Bug Discovery
+
+PBT excels at discovering edge cases. In practice, PBT tests often reveal bugs that example-based tests miss:
+
+- **Whitespace handling**: Titles like `"   "` (spaces only) may pass length validation but fail semantic validation
+- **Boundary conditions**: Exact boundary values (e.g., price = 0, price = 10000) may have off-by-one errors
+- **Unicode edge cases**: Special characters, emojis, or non-ASCII text may break string processing
+- **Numeric precision**: Floating-point rounding errors in price calculations
+
+**Real example**: In the case study implementation, PBT immediately discovered that whitespace-only titles were incorrectly accepted as valid, revealing a gap in validation logic that manual test cases had not covered.
+
+#### 5.3.6 Integration with Example-Based Tests
+
+**Best Practice**: Use both approaches complementarily:
+
+- **Example-based tests** (`createProductUseCase.spec.ts`): Document specific scenarios from user stories, serve as living documentation
+- **Property-based tests** (`createProductUseCase.pbt.spec.ts`): Validate business rule invariants across the entire domain
+
+This dual approach provides:
+- **Specification clarity**: Examples illustrate concrete use cases
+- **Comprehensive coverage**: Properties ensure rules hold universally
+- **Regression safety**: Both catch different classes of bugs
+
+For detailed implementation guidance, see:
+- **[Property-Based Testing Guide](./docs/PROPERTY_BASED_TESTING.md)**: Comprehensive explanation of PBT concepts, generators, and patterns
+- **[PBT DSL Comparison](./docs/PBT_DSL_COMPARISON.md)**: Before/after comparison showing how to hide `fast-check` complexity behind domain-friendly DSL wrappers
+
+### 5.4 Standards and Libraries
 For a detailed survey of existing standards (Gherkin) and libraries (Kotest, RSpec, etc.), refer to **Appendix B: DSLs for Executable Specifications**.
 
 ---
@@ -731,78 +867,11 @@ Then the session is created with status "published" and all values are recorded.
 
 ---
 
-## 8. Case Study: Test DSL for Behavior-Driven Development
 
-### 8.1 Context
-The case study involves a laser quest booking system built with TypeScript, Express.js, and Clean Architecture principles. The system uses a test DSL to express behavior-driven tests in a readable, fluent style, bridging the gap between user stories and technical implementation.
 
-### 8.2 DSL Design and Benefits
-The implementation of this DSL validates the design principles outlined in **Section 5.2**. By encapsulating setup and assertion logic, it reduces test verbosity by over 60% compared to traditional unit tests while maintaining full type safety.
+## 8. Challenges and Lessons Learned!
 
-The test DSL follows the Given-When-Then pattern, common in BDD:
-
-```typescript
-// Given: Set up initial context
-await createSessionScenario()
-    .noSessions()
-    
-    // When: Execute the action
-    .when.creating.sessionWith
-        .date(sessionDate)
-        .duration(30)
-        .availablePacks(20)
-        .price(15)
-        .execute()
-    
-    // Then: Assert the outcome
-    .shouldSucceed()
-    .with.session(s => {
-        s.hasDate(sessionDate);
-        s.hasDuration(30);
-        s.hasAvailablePacks(20);
-        s.hasReservedPacks(0);
-        s.hasPrice(15);
-        s.hasStatus('publié');
-    });
-```
-
-### 8.3 Implementation Architecture
-The architecture leverages the patterns defined in **Section 5.1** to ensure a rigid yet expressive test structure.
-
-#### 8.3.1 Base Classes and State Management
-A hierarchy of base classes manages the test context (repositories, entities, and behaviors):
-
-```typescript
-export class GivenContext<TUseCase, TInput, TOutput> {
-    protected repositories: Map<string, Repository> = new Map();
-    protected entities: Map<string, unknown[]> = new Map();
-    protected repositoryBehaviors: Map<string, 'fail' | 'succeed'> = new Map();
-
-    constructor(
-        protected readonly useCaseFactory: (repos: Map<string, Repository>) => TUseCase
-    ) {}
-
-    protected buildWhen(): WhenAction<TUseCase, TInput, TOutput> {
-        return new WhenAction(this.useCaseFactory, this.repositories, this.entities, this.repositoryBehaviors);
-    }
-
-    get and(): this {
-        return this;
-    }
-}
-```
-
-#### 8.3.2 Semantic Transitions
-The DSL leverages **Semantic Transitions** (see Section 5.1.1) via getter properties (e.g., `.when`) to guide the developer through the test phases (Given → When → Then).
-
-### 8.4 Integration with AI-Assisted Development
-As demonstrated in **Section 6.4**, this architecture provides a clear "contract" that LLMs follow to generate syntactically correct and semantically meaningful tests. This workflow ensures that AI-generated code adheres to domain requirements and architectural guidelines.
-
----
-
-## 9. Challenges and Lessons Learned
-
-### 9.1 DSL Evolution
+### 8.1 DSL Evolution
 
 As domains evolve, DSLs must evolve accordingly. The challenge is balancing extensibility with simplicity:
 
@@ -810,7 +879,7 @@ As domains evolve, DSLs must evolve accordingly. The challenge is balancing exte
 - **Backward compatibility**: Maintain compatibility with existing DSL code when possible.
 - **Versioning**: Consider versioning DSL APIs to manage breaking changes.
 
-### 9.2 Team Adoption
+### 8.2 Team Adoption
 
 Successful DSL adoption requires team buy-in:
 
@@ -818,7 +887,7 @@ Successful DSL adoption requires team buy-in:
 - **Documentation**: Maintain comprehensive, up-to-date documentation.
 - **Code reviews**: Use code reviews to enforce DSL patterns and best practices.
 
-### 9.3 Integration with Development Workflows
+### 8.3 Integration with Development Workflows
 
 DSLs must integrate seamlessly with existing development tools and workflows:
 
@@ -826,7 +895,7 @@ DSLs must integrate seamlessly with existing development tools and workflows:
 - **CI/CD integration**: Validate DSL code in continuous integration pipelines.
 - **Version control**: Ensure DSL code diffs are readable and meaningful.
 
-### 9.4 Performance Considerations
+### 8.4 Performance Considerations
 
 DSLs can introduce performance overhead:
 
@@ -834,39 +903,10 @@ DSLs can introduce performance overhead:
 - **Memory usage**: DSL abstractions may consume additional memory.
 - **Profiling**: Profile DSL code to identify performance bottlenecks.
 
----
-
-## 10. Future Directions and Research Opportunities
-
-### 10.1 AI-Driven DSL Generation
-
-Future research should explore:
-
-- **Automatic DSL design**: Using machine learning to design DSLs based on domain characteristics.
-- **Adaptive DSLs**: DSLs that adapt to user preferences and usage patterns.
-- **Multi-modal DSLs**: DSLs that support multiple input modalities (text, visual, voice).
-
-### 10.2 DSL Composition and Interoperability
-
-- **DSL composition**: Combining multiple DSLs to express complex concepts.
-- **DSL interoperability**: Enabling seamless interaction between different DSLs.
-- **DSL standards**: Developing standards for DSL design and implementation.
-
-### 10.3 Formal Verification
-
-- **DSL semantics**: Formally specifying DSL semantics to enable verification.
-- **Correctness proofs**: Proving properties of DSL code.
-- **Model checking**: Using model checking to validate DSL expressions.
-
-### 10.4 DSL Tooling and Infrastructure
-
-- **DSL IDEs**: Developing specialized IDEs for DSL development.
-- **DSL debugging**: Improving debugging support for DSL code.
-- **DSL profiling**: Developing profiling tools to optimize DSL performance.
 
 ---
 
-## 11. Conclusion
+## 9. Conclusion
 
 Domain-Specific Languages represent a powerful abstraction mechanism for bridging the gap between domain experts and software engineers. By providing a notation tailored to a specific problem domain, DSLs enhance code clarity, maintainability, and collaboration.
 
