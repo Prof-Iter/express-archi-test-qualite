@@ -85,13 +85,13 @@ class CreateProductWhen {
     ) {}
 
     private async executeProductCreation(input: CreateProductInput): Promise<CreateProductThen> {
-        const behavior = this.repositories.get('repositoryBehavior') as 'fail' | 'succeed' | undefined;
+        const behavior = this.repositories.get('repositoryBehavior') as unknown as 'fail' | 'succeed' | undefined;
         let productRepo;
 
         if (behavior === 'fail') {
             productRepo = new ProductRepositoryFail();
         } else {
-            const products = this.repositories.get('products') as Product[] | undefined;
+            const products = this.repositories.get('products') as unknown as Product[] | undefined;
             productRepo = new ProductRepositoryInMemory(products || []);
         }
 

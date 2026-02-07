@@ -34,7 +34,8 @@ describe("US-1 : Créer une session", () => {
 
         const result = await createSessionScenario()
             .noSessions()
-            .when.creating.sessionWith
+            .when
+            .creating.sessionWith
                 .date(sessionDate)
                 .duration(45)
                 .availablePacks(30)

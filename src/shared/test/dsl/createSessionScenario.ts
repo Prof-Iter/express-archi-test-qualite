@@ -17,6 +17,7 @@ class CreateSessionGiven extends SessionGivenContext<CreateSessionUseCase, Creat
         super(() => ({} as any));
     }
 
+    // @ts-ignore
     get when(): CreateSessionWhen {
         return new CreateSessionWhen(this.repositories, this.entities);
     }
