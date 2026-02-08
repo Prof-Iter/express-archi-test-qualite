@@ -16,40 +16,36 @@ Les langages dédiés (Domain-Specific Languages ou DSL) se sont imposés comme 
 
 ### La Motivation
 
-Le développement logiciel fait face à un défi persistant : traduire les exigences métier en code exécutable tout en préservant la clarté, l'exactitude et la maintenabilité. Les approches traditionnelles créent souvent un "fossé sémantique" entre les experts du domaine (qui comprennent les règles métier) et les développeurs (qui comprennent le code). Ce fossé se manifeste par :
-
-- **Des spécifications mal alignées** : Les exigences en langage naturel sont souvent ambiguës.
-- **Une divergence test-code** : Les tests se déconnectent de la logique métier.
-- **Une charge de maintenance accrue** : Les changements de règles métier imposent des modifications sur trop d'artefacts (spécifications, tests, implémentations).
+Le développement logiciel fait face à un défi persistant : traduire les exigences métier en code exécutable tout en préservant la clarté, l'exactitude et la maintenabilité. Les approches traditionnelles créent souvent un "fossé sémantique" entre les experts du domaine (qui comprennent les règles métier) et les développeurs (qui comprennent le code). Ce fossé se manifeste de plusieurs façons. D'abord, les spécifications en langage naturel sont souvent ambiguës et mal alignées avec le code. Ensuite, les tests se déconnectent progressivement de la logique métier réelle. Enfin, chaque changement de règles métier impose des modifications sur trop d'artefacts à la fois : spécifications, tests, implémentations.
 
 Les DSL répondent à ces défis en offrant une notation sur mesure, permettant d'exprimer l'intention dans un langage proche du modèle conceptuel métier.
 
 ### Ce que cet article apporte
 
-1. **Une définition des DSL** dans le contexte de l'ingénierie logicielle.
-2. **Une exploration des patterns et architectures** pour l'implémentation de DSL.
-3. **Une analyse des défis** de développement et de maintenance.
-4. **Un panorama des standards et bibliothèques** existants.
-5. **Une étude de l'IA** pour la génération de DSL.
-6. **Un cas d'étude concret** en BDD.
+Cet article commence par définir les DSL dans le contexte de l'ingénierie logicielle moderne. J'explore ensuite les patterns et architectures qui permettent d'implémenter des DSL robustes. J'analyse les défis de développement et de maintenance que vous rencontrerez. Je dresse un panorama des standards et bibliothèques existants pour vous aider à démarrer. J'étudie aussi le rôle émergent de l'IA dans la génération de DSL. Enfin, je présente un cas d'étude concret en BDD pour illustrer ces concepts.
 
 ### Impliquer les Product Owners
 
-Un avantage souvent sous-estimé des DSL est leur capacité à rapprocher les Product Owners (PO) du code technique. Même sans connaissance préalable en programmation, un PO peut apprendre à lire un DSL bien conçu :
-
-- **Lisibilité accrue** : Le DSL utilise le vocabulaire du métier, rendant le code accessible
-- **Validation directe** : Les PO peuvent vérifier que les tests reflètent bien les exigences
-- **Collaboration améliorée** : Le dialogue technique-métier devient plus fluide
+Un avantage souvent sous-estimé des DSL est leur capacité à rapprocher les Product Owners (PO) du code technique. Même sans connaissance préalable en programmation, un PO peut apprendre à lire un DSL bien conçu. Le DSL utilise le vocabulaire du métier, ce qui rend le code accessible. Les PO peuvent ainsi vérifier directement que les tests reflètent bien les exigences. Le dialogue technique-métier devient naturellement plus fluide.
 
 Aujourd'hui, de nombreux PO ont un passé de développeur ou développeuse, ce qui facilite encore plus cette approche. Pour les autres, l'IA représente un outil précieux : elle peut expliquer ligne par ligne ce que fait un DSL, traduire les concepts techniques en langage métier, et même générer de la documentation accessible aux non-initiés.
 
 Cette combinaison - DSL lisibles et IA explicative - ouvre la porte à une collaboration plus étroite entre équipes techniques et produit.
 
-## Qu'est-ce qu'un DSL, Vraiment ?
+## Connaissez vous les DSL ?
 
 ### Définition
 
-Un DSL est un langage de programmation spécialisé dans un domaine précis. Contrairement aux langages généraux comme JavaScript ou C#, un DSL se concentre sur un ensemble limité de problématiques, mais les traite de manière ciblée.
+Un DSL est un langage  spécialisé dans un domaine métier précis. 
+
+L'idée est que ce langage soit à la fois exécutable et plus proche du langage du métier que du langage du code.
+
+On parle alors de spécifications éxecutables.
+
+Contrairement aux langages de programmation "pur" comme JavaScript ou C#, peu accessible aux non-développeurs, 
+un DSL se concentre sur un ensemble limité de problématiques, mais les traite de manière ciblée.
+
+
 
 **Exemple concret :** Au lieu d'écrire des tests techniques comme :
 
@@ -101,16 +97,10 @@ Un bon DSL est souvent une couche d'élégance posée par-dessus une API techniq
 
 ### Quel langage choisir ?
 
-Si vous avez le choix du langage, certains facilitent énormément la création de DSL :
+Si vous avez le choix du langage, certains facilitent énormément la création de DSL. 
+Kotlin est mon favori : ses fonctions d'extension permettent de rajouter des méthodes à des classes existantes sans les modifier. TypeScript est très pragmatique et permet de créer des DSL qui se valident tout seuls pendant qu'on tape grâce au système de types. C# est très puissant aussi, notamment pour faire des requêtes de données qui ressemblent à du langage naturel avec LINQ. Ruby reste historiquement le roi des DSL lisibles, car il permet d'enlever presque toutes les parenthèses.
 
-1. **Kotlin** : C'est mon favori. Ses fonctions d'extension permettent de rajouter des méthodes à des classes existantes sans les modifier.
-2. **TypeScript** : Très pragmatique. On peut créer des DSL qui se valident tout seuls pendant qu'on tape grâce au système de types.
-3. **C#** : Très puissant aussi, notamment pour faire des requêtes de données qui ressemblent à du langage naturel (LINQ).
-4. **Ruby** : Historiquement le roi des DSL lisibles, car il permet d'enlever presque toutes les parenthèses.
-
-## Pourquoi Je Pense que les FP et les DSL Font la Paire Parfaite
-
-### Position : L'Apport de la Programmation Fonctionnelle
+## Pourquoi je pense que les FP et les DSL font la paire parfaite
 
 Construire des DSL avec la programmation fonctionnelle (FP) tend à produire des résultats plus élégants et lisibles qu'avec l'approche impérative traditionnelle.
 
@@ -164,22 +154,28 @@ async execute(): Promise<Result<Session>> {
 
 ### Choix de Langages pour les DSL
 
-#### Kotlin : Une Option Intéressante
+#### Kotlin : le roi du Fonctionnel au ropyaume des Objets
 
 Kotlin se prête bien à la création de DSL grâce à ses fonctions d'extension, ses lambdas en fin de paramètre, et ses builders typés :
 
 ```kotlin
 // DSL Kotlin qui ressemble à une phrase
-html {
-    head {
-        title { "Ma Page" }
+createSession {
+    given { aucuneSessionExistante() }
+    whenCreating {
+        date = demain
+        duration = 60
+        maxPlayers = 20
     }
-    body {
-        h1 { "Bienvenue" }
-        p { "Ceci est un DSL fluide" }
+    then {
+        shouldSucceed()
+        session.hasDate(demain)
+        session.hasDuration(60)
     }
 }
 ```
+
+Certains peuvent trouver le franglais choquant ici, nous y reviendrons. Il y a moyen d'arranger cela.
 
 #### TypeScript : L'Approche Pragmatique
 
@@ -196,9 +192,9 @@ interface Session {
 }
 ```
 
-#### C# : Les Records Modernes
+#### C# : un arsenal de syntaxe inspirée du Fonctionnel
 
-C# moderne avec ses types `record` propose une immuabilité élégante :
+C# moderne offre un arsenal complet pour la programmation fonctionnelle. Les types `record` apportent l'immuabilité par défaut. Les expression-bodied members rendent le code concis. Le pattern matching permet une logique déclarative. LINQ transforme les collections avec des opérations fonctionnelles.
 
 ```csharp
 // C# record - immuabilité par défaut
@@ -207,15 +203,33 @@ public record SessionConfig(DateTime Date, int Duration)
     public SessionConfig WithDuration(int newDuration) => 
         this with { Duration = newDuration };
 }
+
+// Pattern matching et expressions
+public static Result<Session> Validate(SessionConfig config) => config switch
+{
+    { Duration: <= 0 } => Error("Duration must be positive"),
+    { Date: var d } when d < DateTime.Now => Error("Date must be in future"),
+    _ => Success(new Session(config))
+};
+
+// LINQ pour un DSL de requête fluide
+var sessions = repository
+    .GetAll()
+    .Where(s => s.Date > DateTime.Now)
+    .OrderBy(s => s.Date)
+    .Select(s => s.ToDto());
 ```
 
-## Le Test par Propriétés : Une Approche Différente
+## Le Test par Propriétés (PBT) : Une Approche Complémentaire
 
-### Découverte du Test par Propriétés
+### Découverte du PBT:  Property Base Testing
 
-Pendant longtemps, les tests étaient écrits manuellement avec des exemples spécifiques. Le test par propriétés (Property-Based Testing) offre une approche complémentaire intéressante.
+Pendant longtemps, les tests étaient écrits manuellement avec des exemples spécifiques.
+Le test par propriétés (Property-Based Testing) offre une approche permettant d'automatiser la recherche
+des cas aux limites (edge cases).
 
-#### Limites des Tests par Exemples
+
+#### Limites des Tests par Exemples (sans PBT)
 
 Avec un test par exemple :
 
@@ -234,7 +248,7 @@ test("créer un produit Switch 2", async () => {
 
 On teste **un seul cas**. Mais que se passe-t-il si le titre contient des caractères spéciaux ? Si le prix est exactement 0 ? S'il y a des espaces ?
 
-#### Tester des Propriétés
+#### Tester des Propriétés intrinsèquement
 
 Avec le test par propriétés, on teste des **invariants** :
 
@@ -274,11 +288,8 @@ await forAllValidProducts()
 
 ### Types de Bugs Découverts
 
-Cette approche permet de découvrir des bugs difficiles à anticiper :
-
-- **Titres avec seulement des espaces** : `"   "` passe la validation de longueur mais ne devrait pas être valide
-- **Prix exactement à 0** : certains codes traitent 0 comme "pas de prix"
-- **Caractères Unicode** : émojis, accents, caractères spéciaux qui cassent le traitement
+Cette approche permet de découvrir des bugs difficiles à anticiper. 
+Par exemple, des titres composés uniquement d'espaces comme `"   "` passent la validation de longueur mais ne devraient pas être valides. Un prix exactement à 0 peut être traité par certains codes comme "pas de prix". Les caractères Unicode comme les émojis, accents ou caractères spéciaux peuvent casser le traitement de manière inattendue.
 
 ## DSL et Langage du Métier Français
 
@@ -332,10 +343,7 @@ await createReservationScenario()
 
 ### Avantages pour les Équipes Francophones
 
-Cette approche crée un pont entre :
-- **Les experts métier** qui parlent français naturellement
-- **Les développeurs** qui comprennent la structure technique
-- **Les tests** qui deviennent compréhensibles par tous
+Cette approche crée un pont entre les experts métier qui parlent français naturellement, les développeurs qui comprennent la structure technique, et les tests qui deviennent compréhensibles par tous.
 
 ## Les DSL comme Pont entre Technique et Produit
 
@@ -343,11 +351,7 @@ Un avantage souvent sous-estimé des DSL est leur capacité à faciliter la coll
 
 ### Engagement des Product Owners
 
-Les DSL permettent aux PO de s'impliquer directement dans la validation du code, même sans background technique :
-
-- **Vocabulaire métier dans le code** : Les DSL utilisent la terminologie du domaine, rendant les spécifications lisibles par les non-techniciens
-- **Validation directe des exigences** : Les PO peuvent vérifier que les tests reflètent bien les règles métier et user stories
-- **Réduction des barrières de communication** : La distance sémantique entre exigences métier et implémentation technique est minimisée
+Les DSL permettent aux PO de s'impliquer directement dans la validation du code, même sans background technique. Les DSL utilisent la terminologie du domaine, ce qui rend les spécifications lisibles par les non-techniciens. Les PO peuvent vérifier directement que les tests reflètent bien les règles métier et user stories. La distance sémantique entre exigences métier et implémentation technique est ainsi minimisée.
 
 **Exemple** : Un PO peut lire et valider cette spécification de test :
 ```typescript
@@ -370,39 +374,22 @@ Le test se lit comme un scénario métier plutôt que du code technique, permett
 
 ### Compréhension Assistée par l'IA
 
-Les outils IA modernes améliorent l'engagement des PO en fournissant :
-
-- **Explications ligne par ligne** : L'IA peut traduire la syntaxe DSL en explications métier en langage naturel
-- **Mapping de concepts** : Les constructions techniques du DSL sont mappées aux concepts du domaine métier
-- **Génération de documentation** : L'IA crée une documentation accessible pour les non-techniciens
+Les outils IA modernes améliorent l'engagement des PO de plusieurs façons. L'IA peut traduire la syntaxe DSL en explications métier en langage naturel, ligne par ligne. Les constructions techniques du DSL sont mappées aux concepts du domaine métier. L'IA crée aussi une documentation accessible pour les non-techniciens.
 
 **Exemple d'explication IA** :
 > *"Ce test vérifie que quand aucune session n'existe et qu'on crée une nouvelle session de 45 minutes pour 20 joueurs, le système doit réussir à créer la session avec exactement ces spécifications."*
 
 ### Avantages Organisationnels
 
-La combinaison de DSL lisibles et d'assistance IA crée des avantages organisationnels :
-
-- **Cycles de feedback plus rapides** : Les PO peuvent valider les exigences directement dans le code de test
-- **Moins de mauvaises interprétations** : Les règles métier sont encodées explicitement plutôt qu'implicitement
-- **Amélioration de la qualité** : La validation de la logique métier se fait au niveau des spécifications
+La combinaison de DSL lisibles et d'assistance IA crée des avantages organisationnels concrets. Les cycles de feedback deviennent plus rapides car les PO peuvent valider les exigences directement dans le code de test. Les mauvaises interprétations diminuent car les règles métier sont encodées explicitement plutôt qu'implicitement. La qualité s'améliore car la validation de la logique métier se fait au niveau des spécifications.
 
 ### Considérations d'Implémentation
 
-Une collaboration PO-technique réussie via les DSL nécessite :
-
-- **Terminologie cohérente** : Le vocabulaire du DSL doit s'aligner sur le langage métier établi
-- **Complexité progressive** : Commencer par des constructions DSL simples et introduire progressivement la sophistication
-- **Formation et documentation** : Les PO ont besoin de guidance pour lire et interpréter les spécifications DSL
+Une collaboration PO-technique réussie via les DSL nécessite quelques précautions. Le vocabulaire du DSL doit s'aligner sur le langage métier établi pour garantir une terminologie cohérente. Il faut commencer par des constructions DSL simples et introduire progressivement la sophistication. Les PO ont aussi besoin de guidance pour lire et interpréter les spécifications DSL, d'où l'importance de la formation et de la documentation.
 
 ### Observations Empiriques
 
-Les organisations implémentant la collaboration via les DSL rapportent :
-
-- **30-40% de réduction** des réunions de clarification d'exigences
-- **50% plus rapide** les cycles de validation d'exigences
-- **Satisfaction améliorée** des équipes techniques et produit
-- **Moins de bugs** dus à des exigences mal interprétées
+Les organisations implémentant la collaboration via les DSL rapportent des résultats encourageants. On observe une réduction de 30 à 40% des réunions de clarification d'exigences. Les cycles de validation d'exigences sont environ 50% plus rapides. La satisfaction des équipes techniques et produit s'améliore sensiblement. Le nombre de bugs dus à des exigences mal interprétées diminue de manière significative.
 
 Cette approche représente une évolution significative des pratiques de développement traditionnelles, positionnant les DSL non seulement comme des outils techniques mais comme des facilitateurs organisationnels pour un meilleur alignement produit-technique.
 
@@ -433,10 +420,7 @@ L'IA peut manquer de profondeur sur les contraintes métier spécifiques. Il est
 
 ### Bonnes Pratiques pour l'IA et les DSL
 
-1. **Établir un "Contrat" DSL clair** : Définir explicitement la syntaxe et les contraintes pour guider l'IA.
-2. **Utiliser le Few-Shot Learning** : Fournir des exemples de code DSL valide dans les instructions.
-3. **Implémenter une Validation Automatisée** : Utiliser le test par propriétés pour vérifier que le code généré par l'IA respecte les invariants.
-4. **Garder l'Humain dans la Boucle** : Traiter le code généré comme un brouillon à réviser.
+Pour tirer le meilleur parti de l'IA dans le développement de DSL, quelques pratiques se sont révélées efficaces. Il faut d'abord établir un "contrat" DSL clair en définissant explicitement la syntaxe et les contraintes pour guider l'IA. Le few-shot learning fonctionne bien : fournissez des exemples de code DSL valide dans les instructions. Implémentez une validation automatisée en utilisant le test par propriétés pour vérifier que le code généré respecte les invariants. Enfin, gardez toujours l'humain dans la boucle en traitant le code généré comme un brouillon à réviser.
 
 ## Cas d'Étude : Génération de Tests à partir de User Stories
 
@@ -530,9 +514,7 @@ Profitez de la puissance de TypeScript ou Kotlin. Un bon DSL doit vous empêcher
 
 ## Les Défis à Anticiper
 
-- **La Dérive du Périmètre (Scope Creep)** : Un DSL doit rester simple. S'il commence à ressembler à un langage généraliste, c'est que vous êtes allé trop loin.
-- **La Maintenance** : Un DSL est un code vivant. Si le métier change ses règles, votre DSL doit suivre immédiatement.
-- **Les Silos de Connaissance** : Documentez votre DSL avec des exemples clairs. L'IA peut vous aider à générer cette doc !
+La dérive du périmètre est un risque réel. Un DSL doit rester simple : s'il commence à ressembler à un langage généraliste, c'est que vous êtes allé trop loin. La maintenance est aussi un défi constant car un DSL est un code vivant. Si le métier change ses règles, votre DSL doit suivre immédiatement. Attention enfin aux silos de connaissance : documentez votre DSL avec des exemples clairs. L'IA peut vous aider à générer cette documentation.
 
 ## Conclusion
 
