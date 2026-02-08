@@ -289,7 +289,7 @@ Si le prix est exactement 0  ?
 
 #### Tester des Propriétés intrinsèquement
 
-Avec le test par propriétés (PBT), on a une arme pour vérifier automatiquement les **invariants** :
+Avec le test par propriétés (PBT), on a une arme pour vérifier automatiquement les **invariants** de chaque propriété du modèle :
 
 ```typescript
 // Test par propriétés - exhaustif
@@ -313,7 +313,9 @@ Ce test génère **100 produits aléatoires valides** et vérifie que la propri�
 
 ### Un DSL pour Simplifier l'Utilisation
 
-Les bibliothèques comme `fast-check` peuvent être complexes. On peut créer dans le DSL, des wrappers qui cachent cette complexité :
+Les bibliothèques comme `fast-check` en TypeScript peuvent être complexes à l'écriture.
+Pour rendre cela plus lisible à des PO, on peut créer dans le DSL, des wrappers qui cachent cette complexité :
+
 
 ```typescript
 // Avant : technique, intimidant
@@ -330,19 +332,28 @@ await fc.assert(
 
 // Après : domaine, lisible
 await forAllValidProducts()
+    .RunningX(100)
     .shouldAlwaysHold(async (product) => { /* logique de test */ });
 ```
 
 ### Types de Bugs Découverts
 
 Cette approche permet de découvrir des bugs difficiles à anticiper. 
-Par exemple, des titres composés uniquement d'espaces comme `"   "` passent la validation de longueur mais ne devraient pas être valides. Un prix exactement à 0 peut être traité par certains codes comme "pas de prix". Les caractères Unicode comme les émojis, accents ou caractères spéciaux peuvent casser le traitement de manière inattendue.
+
+Par exemple, des titres composés uniquement d'espaces comme `"◻️◻️◻️"` passent la validation de longueur mais ne devraient pas être valides. 
+
+Un prix exactement à 0 peut être traité par certains codes comme "pas de prix". 
+
+Les caractères Unicode comme les émojis, accents ou caractères spéciaux peuvent casser le traitement de manière inattendue.
 
 ## DSL et Langage du Métier 
 
-### Vision : DSL en Contexte Français
+### Vision : DSL en Contexte non-Anglophone
 
-Dans un contexte francophone, les DSL peuvent traduire le langage ubiquitaire du métier dans la langue du client.
+Dans un contexte qui ne nécessite pas l'emploi de la langue de Shakespeare, les PO ont tout à fait le droit, que dis-je le devoir,
+de présenter le langage ubiquitaire du métier dans la langue telle que parlée par leur client.
+
+
 Voici un exemple en français :
 
 ```typescript
@@ -367,10 +378,10 @@ await creerScenarioReservation()
 
 ### Pour les anglophones acharnés
 
-C'est un grand débat, et il y a ceux qui veulent tout traduire en anglais.
+C'est un grand débat, et il y a ceux qui voudront toujours tout traduire en anglais.
 Alors pourquoi pas.
 
-On se retrouve alors avec du code comme ceci:
+On se retrouve alors parfois avec du code comme celui-ci:
 
 ```typescript
 // DSL hybride : structure anglaise, sémantique française
@@ -392,17 +403,20 @@ await createReservationScenario()
     });
 ```
 
+Il en résulte souvent des ambiguités entre le français et l'anglais , à cause de la proxilmité de certains mots entre ces deux langues.
+Mais attention aux faux-amis !
+
 Tout est une affaire d'appréciation.
 
 
-En pratique, je préfère garder les mots techniques en anglais, pour la partie 'non-métier' du codebase, lorsqu'il s'agit de désigner une base de donnée 
+En pratique, je préfère garder les mots techniques en anglais, pour désigner des éléments de la partie 'non-métier' du codebase, par exemple lorsqu'il s'agit de désigner une base de donnée 
 ou des éléments d'infrastructure.
 
 
 D'ailleurs ces éléments techniques ne devraient pas apparaitre dans la rédaction des exigences métiers (concept d'architecture hexagonale ou orthogonale).
 
 
-### Avantages pour les Équipes Francophones
+### Avantages pour les Équipes non-Anglophones
 
 Cette approche crée un pont entre les experts métier qui parlent français naturellement, les développeurs qui comprennent la structure technique, et les tests qui deviennent compréhensibles par tous.
 
@@ -412,9 +426,12 @@ Un avantage souvent sous-estimé des DSL est leur capacité à faciliter la coll
 
 ### Engagement des Product Owners
 
-Les DSL permettent aux PO de s'impliquer directement dans la validation du code, même sans background technique. Les DSL utilisent la terminologie du domaine, ce qui rend les spécifications lisibles par les non-techniciens. Les PO peuvent vérifier directement que les tests reflètent bien les règles métier et user stories. La distance sémantique entre exigences métier et implémentation technique est ainsi minimisée.
+Les DSL permettent aux PO de s'impliquer directement dans la validation des tests, même sans background technique.
+Les DSL utilisent la terminologie du domaine, ce qui rend les spécifications lisibles par les non-techniciens. 
+Les PO peuvent vérifier directement que les tests reflètent bien les règles métier et user stories. 
+La distance sémantique entre exigences métier et implémentation technique est ainsi minimisée.
 
-**Exemple** : Un PO peut lire et valider cette spécification de test :
+**Exemple** : Un PO peut lire et valider cette spécification de test (on revient sur de l'anglais pour l'exemple):
 ```typescript
 await createSessionScenario()
     .noSessions()
@@ -444,7 +461,7 @@ Les outils IA modernes améliorent l'engagement des PO de plusieurs façons. L'I
 
 La combinaison de DSL lisibles et d'assistance IA crée des avantages organisationnels concrets. 
 
-Les cycles de feedback deviennent plus rapides car les PO peuvent valider les exigences directement dans le code de test.
+Les cycles de feedback deviennent plus rapides, car les PO peuvent valider les exigences directement dans le code de test.
 
 Les mauvaises interprétations diminuent car les règles métier sont encodées explicitement plutôt qu'implicitement. 
 
@@ -456,19 +473,12 @@ Une collaboration PO-technique réussie via les DSL nécessite quelques précaut
 
 Il faut commencer par des constructions DSL simples et introduire progressivement la sophistication. Les PO ont aussi besoin de guidance pour lire et interpréter les spécifications DSL, d'où l'importance de la formation et de la documentation.
 
-### Observations Empiriques
-
-Les organisations implémentant la collaboration via les DSL rapportent des résultats encourageants. On observe une réduction de 30 à 40% des réunions de clarification d'exigences.
-
-Les cycles de validation d'exigences sont environ 50% plus rapides. La satisfaction des équipes techniques et produit s'améliore sensiblement. Le nombre de bugs dus à des exigences mal interprétées diminue de manière significative.
-
-Cette approche représente une évolution significative des pratiques de développement traditionnelles, positionnant les DSL non seulement comme des outils techniques mais comme des facilitateurs organisationnels pour un meilleur alignement produit-technique.
 
 ## Développement de DSL Assisté par l'IA
 
 L'émergence des grands modèles de langage (LLM) comme GPT-4 ou Claude ouvre de nouvelles opportunités pour automatiser le cycle de vie des DSL.
 
-### Motivation et Opportunités
+### Motivations
 
 #### Traduction du Langage Naturel vers le DSL
 Les LLM peuvent traduire des spécifications en langage naturel (user stories, documents d'exigences) en code DSL exécutable.
