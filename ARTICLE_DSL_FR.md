@@ -1,14 +1,37 @@
 # Les DSL : Quand le Code Devient Langage du Métier
 
-*Les Domain-Specific Languages (DSL) représentent une approche intéressante du développement logiciel moderne. Cet article explore comment ces langages spécialisés peuvent améliorer la communication entre le code et le métier.*
+**Auteurs :** [Votre Nom]  
+**Date :** Février 2026  
+**Contexte :** Workshop sur le TDD avec les DSL et la génération de code assistée par l'IA
+
+---
+
+## Résumé (Abstract)
+
+Les langages dédiés (Domain-Specific Languages ou DSL) se sont imposés comme un mécanisme d'abstraction puissant pour combler le fossé entre les experts métier et les ingénieurs logiciel. Cet article explore les fondements théoriques, les patterns de conception pratiques et les défis contemporains du développement de DSL. J'y examine comment les DSL facilitent le développement piloté par le comportement (BDD) via des interfaces de test fluides et expressives, et j'étudie le rôle émergent de l'intelligence artificielle dans l'automatisation de la génération de DSL à partir de spécifications en langage naturel. À travers des exemples concrets issus d'un système de réservation de laser quest, je montre comment les DSL peuvent améliorer la qualité du code, sa maintenabilité et la collaboration entre les parties prenantes techniques et non-techniques.
 
 ---
 
 ## Introduction : L'Intérêt des DSL
 
-Dans les projets complexes, la logique métier se retrouve souvent noyée dans du code technique. Les DSL offrent une solution à ce problème en permettant au code de s'exprimer dans le langage du domaine.
+### La Motivation
 
-Quand on écrit `createSession().noSessions().when.creating.sessionWith.date(maintenant).duration(60)`, on passe d'un code technique à une expression qui raconte une histoire. C'est là l'intérêt principal des DSL.
+Le développement logiciel fait face à un défi persistant : traduire les exigences métier en code exécutable tout en préservant la clarté, l'exactitude et la maintenabilité. Les approches traditionnelles créent souvent un "fossé sémantique" entre les experts du domaine (qui comprennent les règles métier) et les développeurs (qui comprennent le code). Ce fossé se manifeste par :
+
+- **Des spécifications mal alignées** : Les exigences en langage naturel sont souvent ambiguës.
+- **Une divergence test-code** : Les tests se déconnectent de la logique métier.
+- **Une charge de maintenance accrue** : Les changements de règles métier imposent des modifications sur trop d'artefacts (spécifications, tests, implémentations).
+
+Les DSL répondent à ces défis en offrant une notation sur mesure, permettant d'exprimer l'intention dans un langage proche du modèle conceptuel métier.
+
+### Ce que cet article apporte
+
+1. **Une définition des DSL** dans le contexte de l'ingénierie logicielle.
+2. **Une exploration des patterns et architectures** pour l'implémentation de DSL.
+3. **Une analyse des défis** de développement et de maintenance.
+4. **Un panorama des standards et bibliothèques** existants.
+5. **Une étude de l'IA** pour la génération de DSL.
+6. **Un cas d'étude concret** en BDD.
 
 ### Impliquer les Product Owners
 
@@ -63,24 +86,27 @@ await createSessionScenario()
     });
 ```
 
-### Les Deux Familles de DSL
+### Pourquoi faire la distinction avec une API ?
 
-#### DSL Externes : Le Langage Complet
+Quand on commence, on confond souvent DSL et API. Pour moi, la différence est surtout une question de "pour qui" on écrit le code. 
 
-Je distingue les DSL externes qui créent un langage totalement nouveau :
+| Aspect | DSL | API |
+|--------|-----|-----|
+| **Objectif** | Exprimer des besoins métier | Donner accès à des fonctions techniques |
+| **Public** | Experts métier et dévs | Surtout les développeurs |
+| **Syntaxe** | On dirait du français/anglais | Des appels de fonctions classiques |
+| **Abstraction** | On parle de "Produit", de "Session" | On parle de "Base de données", de "JSON" |
 
-```gherkin
-# Gherkin - Langage BDD
-Feature: Gestion des sessions laser quest
-  Scenario: Création d'une session réussie
-    Given Il n'y a aucune session existante
-    When Je crée une session avec 30 minutes et 20 joueurs
-    Then La session devrait être créée avec succès
-```
+Un bon DSL est souvent une couche d'élégance posée par-dessus une API technique un peu brute.
 
-#### DSL Internes : L'Élégance dans le Langage Hôte
+### Quel langage choisir ?
 
-Mais ma préférence va aux DSL internes, ceux qui vivent dans un langage de programmation existant. Ils combinent la puissance du langage hôte avec la clarté du domaine.
+Si vous avez le choix du langage, certains facilitent énormément la création de DSL :
+
+1. **Kotlin** : C'est mon favori. Ses fonctions d'extension permettent de rajouter des méthodes à des classes existantes sans les modifier.
+2. **TypeScript** : Très pragmatique. On peut créer des DSL qui se valident tout seuls pendant qu'on tape grâce au système de types.
+3. **C#** : Très puissant aussi, notamment pour faire des requêtes de données qui ressemblent à du langage naturel (LINQ).
+4. **Ruby** : Historiquement le roi des DSL lisibles, car il permet d'enlever presque toutes les parenthèses.
 
 ## Pourquoi Je Pense que les FP et les DSL Font la Paire Parfaite
 
@@ -380,80 +406,141 @@ Les organisations implémentant la collaboration via les DSL rapportent :
 
 Cette approche représente une évolution significative des pratiques de développement traditionnelles, positionnant les DSL non seulement comme des outils techniques mais comme des facilitateurs organisationnels pour un meilleur alignement produit-technique.
 
-## L'IA et les DSL : Une Collaboration Intéressante
+## Développement de DSL Assisté par l'IA
 
-### Impact de l'IA sur la Création de DSL
+L'émergence des grands modèles de langage (LLM) comme GPT-4 ou Claude ouvre de nouvelles opportunités pour automatiser le cycle de vie des DSL.
 
-Avec l'émergence des LLM comme GPT-4, l'approche de création de DSL évolue. Il devient possible de :
+### Motivation et Opportunités
 
-1. **Générer des DSL à partir de user stories** :
+#### Traduction du Langage Naturel vers le DSL
+Les LLM peuvent traduire des spécifications en langage naturel (user stories, documents d'exigences) en code DSL exécutable. Cela réduit l'effort de codage manuel et permet aux parties prenantes non techniques de contribuer directement aux spécifications de test.
 
+**Exemple de flux de travail :**
+1. **Entrée** : Une user story en français.
+2. **Traitement LLM** : L'IA analyse les règles et génère le code DSL.
+3. **Sortie** : Un test exécutable validant la spécification.
+
+#### Génération de Code à partir d'Expressions DSL
+Inversement, les LLM peuvent générer le code d'implémentation à partir des expressions de test du DSL, automatisant ainsi le cycle "Red-Green-Refactor".
+
+### Défis et Limites
+
+#### Hallucinations et Incohérences
+Les LLM peuvent générer du code syntaxiquement correct mais sémantiquement faux ou inventer des méthodes inexistantes. Une validation humaine reste indispensable.
+
+#### Connaissance du Domaine
+L'IA peut manquer de profondeur sur les contraintes métier spécifiques. Il est crucial de fournir un contexte riche (système de types, règles métier) dans les prompts.
+
+### Bonnes Pratiques pour l'IA et les DSL
+
+1. **Établir un "Contrat" DSL clair** : Définir explicitement la syntaxe et les contraintes pour guider l'IA.
+2. **Utiliser le Few-Shot Learning** : Fournir des exemples de code DSL valide dans les instructions.
+3. **Implémenter une Validation Automatisée** : Utiliser le test par propriétés pour vérifier que le code généré par l'IA respecte les invariants.
+4. **Garder l'Humain dans la Boucle** : Traiter le code généré comme un brouillon à réviser.
+
+## Cas d'Étude : Génération de Tests à partir de User Stories
+
+Considérons une user story pour la création d'une session de Laser Quest :
+
+```markdown
+En tant qu'employé, je veux créer une session, afin que les clients puissent réserver.
+Règles : 
+- Date dans le futur.
+- Durée entre 0 et 60 min.
+- Prix > 10 EUR.
+- Places entre 1 et 30.
 ```
-User story (français) :
-"En tant que gérant d'escape game, je veux créer des réservations 
-pour que les clients puissent réserver en ligne"
 
-DSL généré :
-await createReservationScenario()
-    .noReservations()
-    .when.booking.escapeRoom
-        .name(roomName)
-        .forTeam(teamName)
-        .on(date)
-        .withPlayers(playerCount)
-        .execute()
-```
-
-2. **Valider automatiquement que le DSL généré respecte les règles métier**
-
-3. **Documenter le DSL en français pour les non-techniciens**
-
-### Processus avec l'IA
-
-Pour créer un nouveau DSL avec l'aide de l'IA :
-
-1. **Décrire le domaine en français** à l'IA
-2. **Fournir des exemples de user stories**
-3. **Demander à l'IA de générer la structure du DSL**
-4. **Valider et affiner avec les connaissances techniques**
-5. **Tester avec des propriétés pour assurer la robustesse**
-
-## Conseils Pratiques pour Démarrer
-
-### 1. Commencer Petit
-
-Il n'est pas nécessaire de créer le DSL parfait immédiatement. On peut commencer par une méthode fluide simple :
+**Flux assisté par l'IA :**
+L'IA reçoit le contrat du DSL et la story, puis génère :
 
 ```typescript
-// Début simple
-class ReservationBuilder {
-    name(name: string): this { return this; }
-    date(date: Date): this { return this; }
-    players(count: number): this { return this; }
+test("Création d'une session valide", async () => {
+    const demain = new Date();
+    demain.setDate(demain.getDate() + 1);
+    
+    await createSessionScenario()
+        .noSessions()
+        .when.creating.sessionWith
+            .date(demain)
+            .duration(30)
+            .availablePacks(20)
+            .price(15)
+            .execute()
+        .shouldSucceed()
+        .with.session(s => {
+            s.hasDate(demain);
+            s.hasStatus('publié');
+        });
+});
+```
+
+## Comment construire votre propre DSL ?
+
+Si vous êtes développeur et que vous n'avez jamais implémenté de DSL, voici ma méthode pour passer de la théorie à la pratique. L'idée est de créer un langage qui serve de pont entre votre code technique et les besoins du Product Owner.
+
+### 1. Commencez par le "Rêve" (Design-First)
+N'ouvrez pas votre IDE tout de suite. Prenez une feuille ou un fichier Markdown et écrivez à quoi ressemblerait le test idéal pour votre PO.
+Exemple : `creerProduit().nom("iPhone").prix(1000).devraitReussir()`
+
+### 2. Implémentez avec le Pattern "Fluent Interface"
+C'est la base de la plupart des DSL internes. L'astuce est simple : chaque méthode configure un objet et retourne `this` pour permettre le chaînage.
+
+```typescript
+class ProduitDSL {
+    private _nom: string;
+    
+    nom(valeur: string): this {
+        this._nom = valeur;
+        return this; // Permet de continuer la phrase
+    }
 }
 ```
 
-### 2. Écouter le Langage du Métier
+### 3. Utilisez des "Transitions Sémantiques"
+Pour que le DSL ressemble à une phrase, j'utilise des propriétés "getter" qui ne font rien d'autre que retourner l'objet lui-même, mais qui servent de connecteurs logiques.
 
-Quand les experts métier s'expriment, noter leurs mots exacts. Ces termes peuvent devenir les noms du DSL.
+```typescript
+class ProduitDSL {
+    get et(): this { return this; }
+    get quand(): this { return this; }
+}
 
-### 3. Tester avec des Propriétés
+// Utilisation : dsl.quand.nom("Switch").et.prix(300)
+```
 
-Dès qu'un DSL est fonctionnel, écrire des tests par propriétés. Cette approche peut révéler des problèmes importants.
+### 4. Impliquez le Product Owner
+C'est ici que la magie opère. Une fois que vous avez une première version :
+- **Montrez-lui le code** : Un PO, même non technique, peut lire `.quand.nom("X").et.prix(Y)`.
+- **Demandez-lui de valider les termes** : "Est-ce qu'on dit 'Session' ou 'Créneau' ?".
+- **Utilisez l'IA** : Si le PO trouve ça encore trop obscur, demandez à une IA d'expliquer le DSL en français. Elle est excellente pour ça.
 
-### 4. Impliquer les Non-Développeurs
+## Principes de Conception pour un DSL Réussi
 
-Faire valider le DSL par les experts métier. S'ils peuvent lire et comprendre les tests, l'approche est probablement la bonne.
+Pour que votre DSL reste maintenable (et apprécié par votre équipe), voici mes règles d'or :
+
+### Le Langage Ubiquitaire (DDD)
+Si votre PO parle de "créneau", n'utilisez pas `TimeSlot` dans votre DSL. Le code doit être le reflet exact de la discussion métier.
+
+### Clarté et Concision
+Masquez la technique. Le PO ne veut pas savoir que vous utilisez un `ProductRepositoryInMemory`. Le DSL doit dire `aucuneReservationExistante()`.
+
+### Validation et Sécurité de Type
+Profitez de la puissance de TypeScript ou Kotlin. Un bon DSL doit vous empêcher d'écrire des bêtises à la compilation.
+
+## Les Défis à Anticiper
+
+- **La Dérive du Périmètre (Scope Creep)** : Un DSL doit rester simple. S'il commence à ressembler à un langage généraliste, c'est que vous êtes allé trop loin.
+- **La Maintenance** : Un DSL est un code vivant. Si le métier change ses règles, votre DSL doit suivre immédiatement.
+- **Les Silos de Connaissance** : Documentez votre DSL avec des exemples clairs. L'IA peut vous aider à générer cette doc !
 
 ## Conclusion
 
-Les DSL représentent une approche intéressante qui peut améliorer la communication entre le code et le métier. Ils ne sont pas seulement une technique, mais une façon différente d'aborder le développement.
+Les DSL ne sont pas seulement une technique pour "faire joli". Pour moi, c'est un outil de dialogue. Ils permettent d'aligner les attentes du Product Owner avec la réalité du code technique, tout en offrant aux développeurs un cadre robuste.
 
-Quand un junior comprend rapidement un test complexe grâce à un DSL bien conçu, ou qu'un expert métier valide le code en disant "c'est exactement ça", on mesure la valeur de cette approche.
+L'arrivée de l'IA ne fait qu'accélérer cette tendance : en facilitant la lecture et la génération de ces mini-langages, elle rend le code enfin accessible à ceux qui définissent le produit.
 
-Les DSL servent de pont entre le monde technique et le monde métier. Ils rappellent que le code n'est pas une fin en soi, mais un moyen de résoudre des problèmes concrets.
-
-Pourquoi ne pas essayer cette approche sur votre prochain projet ?
+Si vous n'avez jamais essayé, je vous encourage à commencer par un petit cas d'usage, comme vos tests d'acceptation. Une fois qu'on a goûté à la clarté d'un DSL, il est très difficile de revenir en arrière.
 
 ---
 
