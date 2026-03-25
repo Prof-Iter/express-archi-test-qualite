@@ -82,20 +82,19 @@ describe("US-1 : Créer un produit - Property-Based Tests", () => {
                         .price(productInput.price)
                         .execute();
 
-                resultDirect.shouldSucceed();
-                resultFluent.shouldSucceed();
+                resultDirect.shouldSucceed()
+                    .with.product(p => {
+                        p.hasTitle(productInput.title);
+                        p.hasDescription(productInput.description);
+                        p.hasPrice(productInput.price);
+                    });
 
-                resultDirect.with.product(p => {
-                    p.hasTitle(productInput.title);
-                    p.hasDescription(productInput.description);
-                    p.hasPrice(productInput.price);
-                });
-
-                resultFluent.with.product(p => {
-                    p.hasTitle(productInput.title);
-                    p.hasDescription(productInput.description);
-                    p.hasPrice(productInput.price);
-                });
+                resultFluent.shouldSucceed()
+                    .with.product(p => {
+                        p.hasTitle(productInput.title);
+                        p.hasDescription(productInput.description);
+                        p.hasPrice(productInput.price);
+                    });
             });
     });
 

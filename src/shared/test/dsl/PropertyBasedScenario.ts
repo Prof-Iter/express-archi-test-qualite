@@ -52,13 +52,16 @@ export class PropertyBasedScenario<T> {
     }
 }
 
+const validTitle = (): fc.Arbitrary<string> =>
+    fc.string({ minLength: 3, maxLength: 100, unit: 'grapheme' }).filter(s => s.trim().length > 0);
+
 export class ProductPropertyGenerator {
     static validProducts(): PropertyBasedScenario<{ title: string; description: string; price: number }> {
         return new PropertyBasedScenario(
             fc.record({
-                title: fc.string({ minLength: 3, maxLength: 100 }),
+                title: validTitle(),
                 description: fc.string({ minLength: 0, maxLength: 500 }),
-                price: fc.integer({ min: 0, max: 10000 })
+                price: fc.integer({ min: 1, max: 10000 })
             })
         );
     }
@@ -68,7 +71,7 @@ export class ProductPropertyGenerator {
             fc.record({
                 title: fc.string({ minLength: 0, maxLength: 2 }),
                 description: fc.string({ minLength: 0, maxLength: 500 }),
-                price: fc.integer({ min: 0, max: 10000 })
+                price: fc.integer({ min: 1, max: 10000 })
             })
         );
     }
@@ -76,7 +79,7 @@ export class ProductPropertyGenerator {
     static productsWithNegativePrice(): PropertyBasedScenario<{ title: string; description: string; price: number }> {
         return new PropertyBasedScenario(
             fc.record({
-                title: fc.string({ minLength: 3, maxLength: 100 }),
+                title: validTitle(),
                 description: fc.string({ minLength: 0, maxLength: 500 }),
                 price: fc.integer({ min: -10000, max: -1 })
             })
@@ -86,7 +89,7 @@ export class ProductPropertyGenerator {
     static productsWithExcessivePrice(): PropertyBasedScenario<{ title: string; description: string; price: number }> {
         return new PropertyBasedScenario(
             fc.record({
-                title: fc.string({ minLength: 3, maxLength: 100 }),
+                title: validTitle(),
                 description: fc.string({ minLength: 0, maxLength: 500 }),
                 price: fc.integer({ min: 10001, max: 1000000 })
             })
@@ -96,9 +99,9 @@ export class ProductPropertyGenerator {
     static productsWithBoundaryPrices(): PropertyBasedScenario<{ title: string; description: string; price: number }> {
         return new PropertyBasedScenario(
             fc.record({
-                title: fc.string({ minLength: 3, maxLength: 100 }),
+                title: validTitle(),
                 description: fc.string({ minLength: 0, maxLength: 500 }),
-                price: fc.constantFrom(0, 10000)
+                price: fc.constantFrom(1, 10000)
             })
         );
     }

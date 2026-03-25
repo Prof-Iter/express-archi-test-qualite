@@ -168,4 +168,9 @@ export class ProductAssertions {
         expect(this.product.id).toBe(expected);
         return this;
     }
+
+    titleStartsWith(expected: string): this {
+        expect(this.product.title.startsWith(expected)).toBe(true);
+        return this;
+    }
 }

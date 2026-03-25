@@ -7,7 +7,9 @@
       "Bash(jest:*)",
       "Bash(npm run lint)",
       "Bash(npm run:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(cd \"/Users/guillaume/SOURCES/DAVID ROBERT/express-archii-bdd-scaffhold\" && node -e \"\nconst fc = require\\('fast-check'\\);\n\n// Ce que génère fc.string\\(\\) par défaut\nconst samples = fc.sample\\(fc.string\\({ minLength: 3, maxLength: 10 }\\), 20\\);\nconsole.log\\('fc.string\\(\\) samples:'\\);\nsamples.forEach\\(s => console.log\\(JSON.stringify\\(s\\)\\)\\);\n\" 2>&1)",
+      "Bash(cd \"/Users/guillaume/SOURCES/DAVID ROBERT/express-archii-bdd-scaffhold\" && node -e \"\nconst fc = require\\('fast-check'\\);\n\n// Tester si fc.string génère des strings tout-espaces\nconst allSpaces = fc.sample\\(fc.string\\({ minLength: 3, maxLength: 10 }\\), 10000\\)\n    .filter\\(s => s.trim\\(\\).length === 0\\);\nconsole.log\\('Strings tout-whitespace générées sur 10000:', allSpaces.length\\);\nconsole.log\\('Exemples:', allSpaces.slice\\(0, 5\\).map\\(s => JSON.stringify\\(s\\)\\)\\);\n\n// Tester les caractères générés\nconst chars = new Set\\(\n    fc.sample\\(fc.string\\({ minLength: 1, maxLength: 1 }\\), 1000\\).map\\(s => s.charCodeAt\\(0\\)\\)\n\\);\nconst sorted = [...chars].sort\\(\\(a,b\\) => a-b\\);\nconsole.log\\('Min char code:', sorted[0], '\\(', String.fromCharCode\\(sorted[0]\\), '\\)'\\);\nconsole.log\\('Max char code:', sorted[sorted.length-1]\\);\nconsole.log\\('Contient espace \\(32\\):', chars.has\\(32\\)\\);\nconsole.log\\('Contient tab \\(9\\):', chars.has\\(9\\)\\);\nconsole.log\\('Contient newline \\(10\\):', chars.has\\(10\\)\\);\n\" 2>&1)"
     ],
     "deny": [],
     "ask": []
